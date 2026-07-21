@@ -138,6 +138,11 @@ Daily Cron (act:processdaily) — single scheduler, no duplicate
 - **No Laravel migration required**
 - Deposit wallet (Registration Fee + Topup USDT): `config('income.deposit_wallet')` = `0x5a0fc2285a37c1682dc3f351ca59a043b1a41050`
 
+### Withdrawal income selection
+- Member chooses only **2 buckets**: Locked Reward Unlock (no fee) or Other Incomes total (tiered fee)
+- Locked available = type-10 credits − type-10 debits; Other = total wallet − Locked available
+- Admin earning reports remain per income type; withdrawal list shows the selected bucket
+
 ### Optional post-deploy checks
 1. Activate test ID → locked = 1000, expiry +30d
 2. Activate direct under sponsor → unlock = 10% package, locked decreases

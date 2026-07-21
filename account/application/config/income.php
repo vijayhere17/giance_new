@@ -95,6 +95,29 @@ return [
         0 => 10,
     ],
 
+    // Withdrawal buckets (only two options on member withdraw form)
+    // 10 = Locked Reward Unlock (no admin charge)
+    // 0  = Other Incomes total / pooled (normal charge tiers)
+    'withdrawal_buckets' => [
+        10 => 'Locked Reward Unlock',
+        0  => 'Other Incomes',
+    ],
+
+    // Locked Unlock withdrawals have no admin charge
+    'withdrawal_zero_fee_types' => [10],
+
+    // Labels used on reports for income earning_types
+    'withdrawal_income_types' => [
+        0  => 'Other Incomes',
+        1  => 'Direct Sponsor Income',
+        2  => 'Daily ROI Income',
+        4  => 'Team Level ROI Income',
+        7  => 'Reward Salary',
+        8  => 'Booster Income',
+        9  => 'Life Time Reward',
+        10 => 'Locked Reward Unlock',
+    ],
+
     // Capital withdrawal
     'capital_withdrawal_charge_percent' => 30,
     'capital_withdrawal_window_months' => 8,

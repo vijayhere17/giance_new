@@ -42,7 +42,7 @@
 									<tr class="seprator">
 										<th>#</th>
 										<th>Withdrawal Request</th>
-										<th>Withdrawal Mode</th>
+										<th>Mode / Income</th>
 										<th>Wallet</th>
 										<th>Name</th>
 										<th>Amount ($)</th>

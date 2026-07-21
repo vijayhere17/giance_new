@@ -165,6 +165,78 @@ class EarningWalletController extends Controller
         $debit = self::getcraditdebitsum($member_id, 2);
         return formatdecimal($cradit-$debit, 4);
     }
+
+    // Per-income withdrawable balance = type credits - type debits, capped by total wallet balance
+    public function getIncomeTypeBalance($member_id, $earning_type)
+    {
+        $credit = EarningWallet::where('member_id', $member_id)
+                    ->where('txn_type', 1)
+                    ->where('earning_type', $earning_type)
+                    ->sum('amount');
+        $debit = EarningWallet::where('member_id', $member_id)
+                    ->where('txn_type', 2)
+                    ->where('earning_type', $earning_type)
+                    ->sum('amount');
+
+        $type_balance = max(0, (float)$credit - (float)$debit);
+        $wallet_balance = (float) $this->getearningbalance($member_id);
+
+        return formatdecimal(min($type_balance, $wallet_balance), 4);
+    }
+
+    // Locked Unlock available balance (earning_type 10)
+    public function getLockedUnlockBalance($member_id)
+    {
+        return $this->getIncomeTypeBalance($member_id, 10);
+    }
+
+    // Other incomes total = wallet balance minus Locked Unlock available
+    public function getOtherIncomesBalance($member_id)
+    {
+        $wallet = (float) $this->getearningbalance($member_id);
+        $locked = (float) $this->getLockedUnlockBalance($member_id);
+        return formatdecimal(max(0, $wallet - $locked), 4);
+    }
+
+    // Only two withdraw options: Locked Unlock (no fee) + Other Incomes total (with fee)
+    public function getWithdrawIncomeOptions($member_id)
+    {
+        $options = [];
+
+        $locked = (float) $this->getLockedUnlockBalance($member_id);
+        if ($locked > 0) {
+            $options[] = [
+                'id' => 10,
+                'name' => config('income.withdrawal_buckets.10', 'Locked Reward Unlock'),
+                'balance' => $locked,
+                'zero_fee' => true,
+            ];
+        }
+
+        $other = (float) $this->getOtherIncomesBalance($member_id);
+        if ($other > 0) {
+            $options[] = [
+                'id' => 0,
+                'name' => config('income.withdrawal_buckets.0', 'Other Incomes'),
+                'balance' => $other,
+                'zero_fee' => false,
+            ];
+        }
+
+        return $options;
+    }
+
+    public function getWithdrawBucketBalance($member_id, $bucket)
+    {
+        $bucket = (int) $bucket;
+        if ($bucket === 10) {
+            return $this->getLockedUnlockBalance($member_id);
+        }
+        if ($bucket === 0) {
+            return $this->getOtherIncomesBalance($member_id);
+        }
+        return 0;
+    }
     
     public function getpwbalance($member_id)
     {
