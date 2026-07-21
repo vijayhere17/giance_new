@@ -55,19 +55,19 @@
 
                                     <div class="col-md-12">
                                         <div class="form-group mb-0">
-                                            <label class="form-label" for="income_type">Select Income Type</label>
+                                            <label class="form-label" for="income_type">Select Withdrawal Type</label>
                                             <select class="form-control" name="income_type" id="income_type" style="height: 58px;">
-                                                <option value="">-- Select Income --</option>
+                                                <option value="">-- Select --</option>
                                                 @foreach(($income_options ?? []) as $opt)
                                                     <option value="{{ $opt['id'] }}"
                                                         data-balance="{{ $opt['balance'] }}"
                                                         data-zero-fee="{{ !empty($opt['zero_fee']) ? 1 : 0 }}">
-                                                        {{ $opt['name'] }} (Avail: ${{ number_format($opt['balance'], 4) }}){{ !empty($opt['zero_fee']) ? ' — No Deduction' : '' }}
+                                                        {{ $opt['name'] }} (Avail: ${{ number_format($opt['balance'], 4) }}){{ !empty($opt['zero_fee']) ? ' — No Deduction' : ' — With Deduction' }}
                                                     </option>
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <small class="text-muted income-type-hint">Locked Reward Unlock has no admin charge. Other incomes follow the charge schedule.</small>
+                                        <small class="text-muted income-type-hint">Only 2 options: <b>Locked Reward Unlock</b> (no deduction) or <b>Other Incomes</b> total (with deduction).</small>
                                     </div>
 
                                     <div class="col-md-12">
@@ -122,5 +122,5 @@
 </div>
 @endsection
 @section('jscontent')
-<script src="{{ URL::to('/') }}/assets/js/users/withdrawal.0.13.js?v=1"></script>
+<script src="{{ URL::to('/') }}/assets/js/users/withdrawal.0.13.js?v=2"></script>
 @endsection

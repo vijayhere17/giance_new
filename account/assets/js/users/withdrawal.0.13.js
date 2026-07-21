@@ -104,7 +104,7 @@ function validate(otpstatus) {
     var wallet = $("#with_wallet").val();
 
     if (!selected) {
-        erroralert('Please select an income type.');
+        erroralert('Please select Locked Unlock or Other Incomes.');
         return false;
     }
 
@@ -191,10 +191,10 @@ function resetformdata(balance, income_options) {
 
     var $select = $("#income_type");
     $select.empty();
-    $select.append('<option value="">-- Select Income --</option>');
+    $select.append('<option value="">-- Select --</option>');
 
     (income_options || []).forEach(function(opt) {
-        var feeNote = opt.zero_fee ? ' — No Deduction' : '';
+        var feeNote = opt.zero_fee ? ' — No Deduction' : ' — With Deduction';
         $select.append(
             $('<option></option>')
                 .attr('value', opt.id)

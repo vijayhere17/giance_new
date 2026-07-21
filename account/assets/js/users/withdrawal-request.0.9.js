@@ -9,10 +9,10 @@ const withrawalAddress = (address) => {
 
 function incomeLabel(w_type) {
     var labels = (PHP2JS.data.income_labels || {});
-    if (labels[w_type]) {
+    if (labels[w_type] !== undefined) {
         return labels[w_type];
     }
-    return w_type > 0 ? ('Income #' + w_type) : 'Earning';
+    return parseInt(w_type, 10) === 10 ? 'Locked Reward Unlock' : 'Other Incomes';
 }
 
 function initiateDataTable() {

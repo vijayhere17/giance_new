@@ -63,7 +63,10 @@ class WithdrawalController extends Controller
     public function indexreport(){
         $page_titel = 'Withdrawal Report';  
         $txn_hash_url = 'https://bscscan.com/tx';
-        $income_labels = config('income.withdrawal_income_types', []);
+        $income_labels = config('income.withdrawal_buckets', [
+            10 => 'Locked Reward Unlock',
+            0 => 'Other Incomes',
+        ]);
         return view('users.withdrawal-request')->with([
             'page_titel' => $page_titel,
             'txn_hash_url' => $txn_hash_url,
@@ -113,15 +116,15 @@ class WithdrawalController extends Controller
                 return response()->json(array('success'=>false,'error'=> 'Unauthorized withdrawal!'), 200);
             }
 
-            $allowed_types = array_map('intval', array_keys(config('income.withdrawal_income_types', [])));
+            $allowed_types = array_map('intval', array_keys(config('income.withdrawal_buckets', [10 => 'Locked Reward Unlock', 0 => 'Other Incomes'])));
             $income_type = (int) $data['income_type'];
             if (!in_array($income_type, $allowed_types, true))
             {
-                return response()->json(array('success'=>false,'error'=> 'Please select a valid income type.'), 200);
+                return response()->json(array('success'=>false,'error'=> 'Please select Locked Unlock or Other Incomes.'), 200);
             }
             
             $balance = $walletCon->getearningbalance($userid);
-            $type_balance = $walletCon->getIncomeTypeBalance($userid, $income_type);
+            $type_balance = $walletCon->getWithdrawBucketBalance($userid, $income_type);
 
             if($data["amount"] > $balance)
             {
@@ -130,7 +133,7 @@ class WithdrawalController extends Controller
 
             if($data["amount"] > $type_balance)
             {
-                $label = config('income.withdrawal_income_types.'.$income_type, 'selected income');
+                $label = config('income.withdrawal_buckets.'.$income_type, 'selected income');
                 return response()->json(array('success'=>false,'error'=> 'Insufficient '.$label.' balance.'), 200);
             }
             
@@ -167,9 +170,9 @@ class WithdrawalController extends Controller
                 $parts = explode('-', $member->username);
                 $walletAddress = $parts[0];
 
-                $type_label = config('income.withdrawal_income_types.'.$income_type, 'Income');
+                $type_label = config('income.withdrawal_buckets.'.$income_type, 'Income');
                 
-                // debit wallet against selected income type (tracks per-type balance)
+                // debit: 10 = Locked Unlock bucket, 0 = Other Incomes total
                 $debit_description = 'Withdrawal request - '.$type_label;
                 $log = $walletCon->addearningwalletlog($userid, 2, $income_type, $debit_description, $usd_amount, $coin_rate, $data["amount"], date("Y-m-d H:i:s")); 
                 

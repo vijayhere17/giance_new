@@ -184,27 +184,58 @@ class EarningWalletController extends Controller
         return formatdecimal(min($type_balance, $wallet_balance), 4);
     }
 
+    // Locked Unlock available balance (earning_type 10)
+    public function getLockedUnlockBalance($member_id)
+    {
+        return $this->getIncomeTypeBalance($member_id, 10);
+    }
+
+    // Other incomes total = wallet balance minus Locked Unlock available
+    public function getOtherIncomesBalance($member_id)
+    {
+        $wallet = (float) $this->getearningbalance($member_id);
+        $locked = (float) $this->getLockedUnlockBalance($member_id);
+        return formatdecimal(max(0, $wallet - $locked), 4);
+    }
+
+    // Only two withdraw options: Locked Unlock (no fee) + Other Incomes total (with fee)
     public function getWithdrawIncomeOptions($member_id)
     {
-        $types = config('income.withdrawal_income_types', []);
-        $zero_fee = config('income.withdrawal_zero_fee_types', [10]);
         $options = [];
 
-        foreach ($types as $type_id => $label) {
-            $balance = (float) $this->getIncomeTypeBalance($member_id, $type_id);
-            if ($balance <= 0) {
-                continue;
-            }
-
+        $locked = (float) $this->getLockedUnlockBalance($member_id);
+        if ($locked > 0) {
             $options[] = [
-                'id' => (int) $type_id,
-                'name' => $label,
-                'balance' => $balance,
-                'zero_fee' => in_array((int) $type_id, $zero_fee, true),
+                'id' => 10,
+                'name' => config('income.withdrawal_buckets.10', 'Locked Reward Unlock'),
+                'balance' => $locked,
+                'zero_fee' => true,
+            ];
+        }
+
+        $other = (float) $this->getOtherIncomesBalance($member_id);
+        if ($other > 0) {
+            $options[] = [
+                'id' => 0,
+                'name' => config('income.withdrawal_buckets.0', 'Other Incomes'),
+                'balance' => $other,
+                'zero_fee' => false,
             ];
         }
 
         return $options;
+    }
+
+    public function getWithdrawBucketBalance($member_id, $bucket)
+    {
+        $bucket = (int) $bucket;
+        if ($bucket === 10) {
+            return $this->getLockedUnlockBalance($member_id);
+        }
+        if ($bucket === 0) {
+            return $this->getOtherIncomesBalance($member_id);
+        }
+        return 0;
     }
     
     public function getpwbalance($member_id)

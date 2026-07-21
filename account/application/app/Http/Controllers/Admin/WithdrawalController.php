@@ -49,13 +49,16 @@ class WithdrawalController extends Controller
                                     ->get(); 
         // Fetch records
         $data_arr = array();
-        $income_labels = config('income.withdrawal_income_types', []);
+        $income_labels = config('income.withdrawal_buckets', [
+            10 => 'Locked Reward Unlock',
+            0 => 'Other Incomes',
+        ]);
          
         foreach($records as $record){ 
             if ($record->mode == 0) {
-                $income_name = $income_labels[$record->w_type] ?? ($record->w_type > 0 ? 'Income #'.$record->w_type : 'Earning');
+                $income_name = $income_labels[$record->w_type] ?? ((int)$record->w_type === 10 ? 'Locked Reward Unlock' : 'Other Incomes');
                 $w_mode = '<b>Earning</b><br><small>'.$income_name.'</small>';
-                if ((float)$record->charge_percent <= 0 && (int)$record->w_type === 10) {
+                if ((int)$record->w_type === 10) {
                     $w_mode .= '<br><small style="color:green;">No Deduction</small>';
                 } elseif ($record->charge_percent !== null) {
                     $w_mode .= '<br><small>Charge: '.$record->charge_percent.'%</small>';
