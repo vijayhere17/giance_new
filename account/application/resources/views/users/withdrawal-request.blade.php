@@ -39,10 +39,10 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Request On</th>
-                                        <th>Wallet</th>
+                                        <th>Income Type</th>
                                         <th>Amount</th>
                                         <th>Admin Charge</th>
-                                        <th>Net Amount</th>h>
+                                        <th>Net Amount</th>
                                         <th>Wallet</th>
                                         <th>Txn. Hash</th>
                                         <th>Status</th>
@@ -60,5 +60,5 @@
 </div>
 @endsection
 @section('jscontent')
-<script src="{{ URL::to('/') }}/assets/js/users/withdrawal-request.0.8.js"></script>
+<script src="{{ URL::to('/') }}/assets/js/users/withdrawal-request.0.9.js?v=1"></script>
 @endsection

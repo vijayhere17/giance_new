@@ -138,6 +138,13 @@ Daily Cron (act:processdaily) — single scheduler, no duplicate
 - **No Laravel migration required**
 - Deposit wallet (Registration Fee + Topup USDT): `config('income.deposit_wallet')` = `0x5a0fc2285a37c1682dc3f351ca59a043b1a41050`
 
+### Withdrawal income selection
+- Member selects income type on Withdrawal USDT
+- Locked Reward Unlock (`earning_type` 10) = **0% charge**
+- Other incomes use `withdrawal_charge_tiers` (10% / 5% / 0% by days)
+- Per-type balance tracked via credit/debit `earning_type` on `ewallet_logs`
+- Admin earning report type 10 correctly reads Locked Unlock from `ewallet_logs`
+
 ### Optional post-deploy checks
 1. Activate test ID → locked = 1000, expiry +30d
 2. Activate direct under sponsor → unlock = 10% package, locked decreases

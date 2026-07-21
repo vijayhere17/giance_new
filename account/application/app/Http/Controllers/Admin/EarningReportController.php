@@ -162,44 +162,30 @@ class EarningReportController extends Controller
         $search_arr = $request->get('search');
         $searchValue = $search_arr['value']; // Search value
 
-        // Total records  
-        if($type == 10)
-        {
-            $listearningrep = PotentialWallet::join('users','pwallet_logs.member_id','=','users.id')->where('pwallet_logs.earning_type','=',1)->where('pwallet_logs.amount','>',0)->orderBy('pwallet_logs.created_at','desc'); 
-        }
-        else 
-        {
-           $listearningrep = EarningWallet::join('users','ewallet_logs.member_id','=','users.id')->where('ewallet_logs.earning_type',$type)->where('ewallet_logs.amount','>',0)->orderBy('ewallet_logs.created_at','desc'); 
-        }
+        // All income types (including Locked Unlock = 10) come from ewallet_logs
+        $listearningrep = EarningWallet::join('users','ewallet_logs.member_id','=','users.id')
+                            ->where('ewallet_logs.earning_type', $type)
+                            ->where('ewallet_logs.amount', '>', 0)
+                            ->orderBy('ewallet_logs.created_at', 'desc');
         
         if($searchValue != null){
-            $listearningrep = $listearningrep->where('users.username','=',$searchValue)->orWhere(DB::raw('CONCAT(users.firstname," ",users.lastname)'),'like','%'.$searchValue.'%');
+            $listearningrep = $listearningrep->where(function($q) use ($searchValue) {
+                $q->where('users.username', '=', $searchValue)
+                  ->orWhere(DB::raw('CONCAT(users.firstname," ",users.lastname)'), 'like', '%'.$searchValue.'%');
+            });
         }
                       
         $totalRecords = $listearningrep->count();
         
         $totalRecordswithFilter = $totalRecords;
         
-        if($type == 10)
-        {
-            $records = $listearningrep->select('pwallet_logs.id', 'pwallet_logs.member_id', 'pwallet_logs.txn_type', 'pwallet_logs.earning_type', 'pwallet_logs.description', 'pwallet_logs.amount', 'pwallet_logs.coin_rate', 'pwallet_logs.coin_amount', 'pwallet_logs.created_at')
-                                      ->with(array('member'=>function($query){
-                                            $query->select('id', 'username', 'firstname', 'lastname');
-                                        }))                        
-                                      ->skip($start)
-        							  ->take($length)
-                                      ->get();
-        }
-        else
-        {
-            $records = $listearningrep->select('ewallet_logs.id', 'ewallet_logs.member_id', 'ewallet_logs.txn_type', 'ewallet_logs.earning_type', 'ewallet_logs.description', 'ewallet_logs.amount', 'ewallet_logs.coin_rate', 'ewallet_logs.coin_amount', 'ewallet_logs.created_at')
-                                      ->with(array('member'=>function($query){
-                                            $query->select('id', 'username', 'firstname', 'lastname');
-                                        }))                        
-                                      ->skip($start)
-        							  ->take($length)
-                                      ->get(); 
-        }
+        $records = $listearningrep->select('ewallet_logs.id', 'ewallet_logs.member_id', 'ewallet_logs.txn_type', 'ewallet_logs.earning_type', 'ewallet_logs.description', 'ewallet_logs.amount', 'ewallet_logs.coin_rate', 'ewallet_logs.coin_amount', 'ewallet_logs.created_at')
+                                  ->with(array('member'=>function($query){
+                                        $query->select('id', 'username', 'firstname', 'lastname');
+                                    }))                        
+                                  ->skip($start)
+        						  ->take($length)
+                                  ->get();
         
         // Fetch records
         $data_arr = array();

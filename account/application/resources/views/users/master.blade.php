@@ -208,6 +208,7 @@
                             <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/earning/1/Direct Income">Direct Income</a></li>
                             <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/earning/2/Daily ROI Income">Daily ROI Income</a></li>
                             <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/earning/4/Team Level ROI Income">Team Level ROI Income</a></li>
+                            <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/earning/8/Booster Income">Booster Income</a></li>
                             <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/earning/7/Reward Salary">Reward Salary</a></li>
                             <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/earning/10/Locked Reward Unlock">Locked Reward Unlock</a></li>
                             <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/earning/9/Life Time Reward">Life Time Reward</a></li>

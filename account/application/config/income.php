@@ -95,6 +95,20 @@ return [
         0 => 10,
     ],
 
+    // Income types that can be selected on earning withdrawal (no fee for listed zero-fee types)
+    'withdrawal_income_types' => [
+        1  => 'Direct Sponsor Income',
+        2  => 'Daily ROI Income',
+        4  => 'Team Level ROI Income',
+        7  => 'Reward Salary',
+        8  => 'Booster Income',
+        9  => 'Life Time Reward',
+        10 => 'Locked Reward Unlock',
+    ],
+
+    // Locked Unlock withdrawals have no admin charge
+    'withdrawal_zero_fee_types' => [10],
+
     // Capital withdrawal
     'capital_withdrawal_charge_percent' => 30,
     'capital_withdrawal_window_months' => 8,

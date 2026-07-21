@@ -25,12 +25,22 @@ class WithdrawalController extends Controller
         $member_id = Auth::user()->id;
 
         $balance = $walletCon->getearningbalance($member_id);
+        $income_options = $walletCon->getWithdrawIncomeOptions($member_id);
+        $charge_percent = $this->resolveWithdrawalChargePercent($member_id, 0, 0);
         
         $wallet_addr = Auth::user()->username;
         
         $coin_rate = getwithdrawrate();
           
-        return view('users.withdrawal')->with(['page_titel'=>$page_titel, 'balance'=>$balance, 'wallet_addr'=>$wallet_addr, 'coin_rate'=>$coin_rate])->toJS();
+        return view('users.withdrawal')->with([
+            'page_titel' => $page_titel,
+            'balance' => $balance,
+            'wallet_addr' => $wallet_addr,
+            'coin_rate' => $coin_rate,
+            'income_options' => $income_options,
+            'charge_percent' => $charge_percent,
+            'zero_fee_types' => config('income.withdrawal_zero_fee_types', [10]),
+        ])->toJS();
     }
     
     public function indexPotential()
@@ -52,8 +62,13 @@ class WithdrawalController extends Controller
     
     public function indexreport(){
         $page_titel = 'Withdrawal Report';  
-        $txn_hash_url = 'https://polygonscan.com/tx';
-        return view('users.withdrawal-request')->with(['page_titel'=>$page_titel, 'txn_hash_url'=>$txn_hash_url])->toJS();
+        $txn_hash_url = 'https://bscscan.com/tx';
+        $income_labels = config('income.withdrawal_income_types', []);
+        return view('users.withdrawal-request')->with([
+            'page_titel' => $page_titel,
+            'txn_hash_url' => $txn_hash_url,
+            'income_labels' => $income_labels,
+        ])->toJS();
     }
 
     // =========================================================================================================================================================================
@@ -73,7 +88,8 @@ class WithdrawalController extends Controller
             $request->validate([
                 'amount' => 'required',
                 'wallet' => 'required',
-                'status' => 'required'
+                'status' => 'required',
+                'income_type' => 'required|integer',
             ]);
 
             $data = $request->all();
@@ -96,11 +112,26 @@ class WithdrawalController extends Controller
             {
                 return response()->json(array('success'=>false,'error'=> 'Unauthorized withdrawal!'), 200);
             }
+
+            $allowed_types = array_map('intval', array_keys(config('income.withdrawal_income_types', [])));
+            $income_type = (int) $data['income_type'];
+            if (!in_array($income_type, $allowed_types, true))
+            {
+                return response()->json(array('success'=>false,'error'=> 'Please select a valid income type.'), 200);
+            }
             
             $balance = $walletCon->getearningbalance($userid);
+            $type_balance = $walletCon->getIncomeTypeBalance($userid, $income_type);
+
             if($data["amount"] > $balance)
             {
                 return response()->json(array('success'=>false,'error'=> 'Insufficient account balance.'), 200);
+            }
+
+            if($data["amount"] > $type_balance)
+            {
+                $label = config('income.withdrawal_income_types.'.$income_type, 'selected income');
+                return response()->json(array('success'=>false,'error'=> 'Insufficient '.$label.' balance.'), 200);
             }
             
             $usd_amount = formatdecimal($data["amount"], 4);
@@ -135,19 +166,22 @@ class WithdrawalController extends Controller
                 // remove dash and get zero object
                 $parts = explode('-', $member->username);
                 $walletAddress = $parts[0];
+
+                $type_label = config('income.withdrawal_income_types.'.$income_type, 'Income');
                 
-                // debit wallet
-                $debit_description = 'Withdrawal request submited';
-                $log = $walletCon->addearningwalletlog($userid, 2, 0, $debit_description, $usd_amount, $coin_rate, $data["amount"], date("Y-m-d H:i:s")); 
+                // debit wallet against selected income type (tracks per-type balance)
+                $debit_description = 'Withdrawal request - '.$type_label;
+                $log = $walletCon->addearningwalletlog($userid, 2, $income_type, $debit_description, $usd_amount, $coin_rate, $data["amount"], date("Y-m-d H:i:s")); 
                 
-                $wlog = $this->addwithdrawallog($log->id, $userid, $data["amount"], $coin_rate, formatdecimal($data["amount"]/$coin_rate, 8), $walletAddress, 0);
+                $wlog = $this->addwithdrawallog($log->id, $userid, $data["amount"], $coin_rate, formatdecimal($data["amount"]/$coin_rate, 8), $walletAddress, 0, $income_type);
                 
                 // send withdrawal request
                 $this->instantAutoWithdrawal($wlog->id);
                 
                 $balance = $walletCon->getearningbalance($userid);
+                $income_options = $walletCon->getWithdrawIncomeOptions($userid);
                 
-                return response()->json(array('success'=> true, 'balance'=>$balance, 'error'=> ''), 200);
+                return response()->json(array('success'=> true, 'balance'=>$balance, 'income_options'=>$income_options, 'error'=> ''), 200);
             }
             else
             {
@@ -302,16 +336,17 @@ class WithdrawalController extends Controller
         }
     }
     
-    public function addwithdrawallog($ref_id, $member_id, $amount, $coin_rate, $payable, $address, $mode)
+    public function addwithdrawallog($ref_id, $member_id, $amount, $coin_rate, $payable, $address, $mode, $earning_type = 0)
     {
-        $charge_percent = $this->resolveWithdrawalChargePercent($member_id, $mode);
+        $charge_percent = $this->resolveWithdrawalChargePercent($member_id, $mode, $earning_type);
 
         $charge = ($amount * $charge_percent) / 100;
         $net = ($amount - $charge);
 
         $object = new WithdrawalLog;
         $object->mode = $mode;
-        $object->w_type = 0;
+        // For earning withdrawals (mode 0), w_type stores selected income earning_type
+        $object->w_type = $earning_type;
         $object->ref_id = $ref_id;
         $object->member_id = $member_id;
         $object->amount = $amount;
@@ -327,10 +362,17 @@ class WithdrawalController extends Controller
         return $object;
     }
 
-    // Withdrawal charge tiers by days elapsed since the member's last non-rejected withdrawal of the
-    // same mode (or since activation if there's none yet): <30 days = 10%, <60 days = 5%, >=60 days = 0%.
-    private function resolveWithdrawalChargePercent($member_id, $mode)
+    // Withdrawal charge: Locked Unlock (and other zero-fee types) = 0%.
+    // Other incomes use tiers by days since last non-rejected withdrawal of same mode:
+    // <30 days = 10%, <60 days = 5%, >=60 days = 0%.
+    private function resolveWithdrawalChargePercent($member_id, $mode, $earning_type = 0)
     {
+        $zero_fee = config('income.withdrawal_zero_fee_types', [10]);
+        if ($mode == 0 && in_array((int) $earning_type, $zero_fee, true))
+        {
+            return 0;
+        }
+
         $member = User::find($member_id);
 
         $last = WithdrawalLog::where('member_id', '=', $member_id)
@@ -343,7 +385,7 @@ class WithdrawalController extends Controller
 
         $days_elapsed = $anchor ? floor((strtotime(date('Y-m-d H:i:s')) - strtotime($anchor)) / 86400) : 0;
 
-        $tiers = config('income.withdrawal_charge_tiers'); // e.g. [60=>0, 30=>5, 0=>10], ordered ascending? see below
+        $tiers = config('income.withdrawal_charge_tiers');
         krsort($tiers);
 
         foreach($tiers as $threshold_days => $percent)

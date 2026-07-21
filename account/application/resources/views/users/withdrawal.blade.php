@@ -42,7 +42,7 @@
                                             <div class="card-body p-3">
                                                 <div class="d-flex align-items-center justify-content-between">
                                                     <div>
-                                                        <p class="mb-0 text-white text-opacity-75">Available Balance ($)</p>
+                                                        <p class="mb-0 text-white text-opacity-75">Total Wallet Balance ($)</p>
                                                         <h4 class="mb-0 text-white balance">{{ $balance }}</h4>
                                                     </div>
                                                     <div class="avtar">
@@ -50,6 +50,30 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <div class="form-group mb-0">
+                                            <label class="form-label" for="income_type">Select Income Type</label>
+                                            <select class="form-control" name="income_type" id="income_type" style="height: 58px;">
+                                                <option value="">-- Select Income --</option>
+                                                @foreach(($income_options ?? []) as $opt)
+                                                    <option value="{{ $opt['id'] }}"
+                                                        data-balance="{{ $opt['balance'] }}"
+                                                        data-zero-fee="{{ !empty($opt['zero_fee']) ? 1 : 0 }}">
+                                                        {{ $opt['name'] }} (Avail: ${{ number_format($opt['balance'], 4) }}){{ !empty($opt['zero_fee']) ? ' — No Deduction' : '' }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <small class="text-muted income-type-hint">Locked Reward Unlock has no admin charge. Other incomes follow the charge schedule.</small>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <div class="alert alert-info py-2 mb-0 income-balance-box" style="display:none;">
+                                            Selected income available: $<span class="type-balance">0.0000</span>
+                                            &nbsp;|&nbsp; Charge: <span class="charge-label">—</span>
                                         </div>
                                     </div>
                                     
@@ -61,7 +85,7 @@
                                         <x-input type="text" name="admin_charge" id="admin_charge" placeholder="Admin charge ($)" value=""/>
                                     </div>
                                     
-                                    <div class="4">
+                                    <div class="col-md-4">
                                         <x-input type="text" name="net_amount" id="net_amount" placeholder="Net amount ($)" value=""/>
                                     </div>
                                     
@@ -98,6 +122,5 @@
 </div>
 @endsection
 @section('jscontent')
-<script> const admin_charge = 2; </script>
-<script src="{{ URL::to('/') }}/assets/js/users/withdrawal.0.12.js"></script>
+<script src="{{ URL::to('/') }}/assets/js/users/withdrawal.0.13.js?v=1"></script>
 @endsection

@@ -165,6 +165,47 @@ class EarningWalletController extends Controller
         $debit = self::getcraditdebitsum($member_id, 2);
         return formatdecimal($cradit-$debit, 4);
     }
+
+    // Per-income withdrawable balance = type credits - type debits, capped by total wallet balance
+    public function getIncomeTypeBalance($member_id, $earning_type)
+    {
+        $credit = EarningWallet::where('member_id', $member_id)
+                    ->where('txn_type', 1)
+                    ->where('earning_type', $earning_type)
+                    ->sum('amount');
+        $debit = EarningWallet::where('member_id', $member_id)
+                    ->where('txn_type', 2)
+                    ->where('earning_type', $earning_type)
+                    ->sum('amount');
+
+        $type_balance = max(0, (float)$credit - (float)$debit);
+        $wallet_balance = (float) $this->getearningbalance($member_id);
+
+        return formatdecimal(min($type_balance, $wallet_balance), 4);
+    }
+
+    public function getWithdrawIncomeOptions($member_id)
+    {
+        $types = config('income.withdrawal_income_types', []);
+        $zero_fee = config('income.withdrawal_zero_fee_types', [10]);
+        $options = [];
+
+        foreach ($types as $type_id => $label) {
+            $balance = (float) $this->getIncomeTypeBalance($member_id, $type_id);
+            if ($balance <= 0) {
+                continue;
+            }
+
+            $options[] = [
+                'id' => (int) $type_id,
+                'name' => $label,
+                'balance' => $balance,
+                'zero_fee' => in_array((int) $type_id, $zero_fee, true),
+            ];
+        }
+
+        return $options;
+    }
     
     public function getpwbalance($member_id)
     {

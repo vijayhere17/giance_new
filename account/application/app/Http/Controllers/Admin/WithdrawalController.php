@@ -40,7 +40,7 @@ class WithdrawalController extends Controller
         
         $totalRecordswithFilter = $totalRecords;
         
-        $records = $listwithdrawreq->select('withdrawal_requests.id', 'withdrawal_requests.ref_id', 'withdrawal_requests.mode', 'withdrawal_requests.member_id', 'withdrawal_requests.amount', 'withdrawal_requests.admin', 'withdrawal_requests.tds', 'withdrawal_requests.net', 'withdrawal_requests.rate', 'withdrawal_requests.payable', 'withdrawal_requests.address', 'withdrawal_requests.hash', 'withdrawal_requests.remark', 'withdrawal_requests.status', 'withdrawal_requests.created_at')
+        $records = $listwithdrawreq->select('withdrawal_requests.id', 'withdrawal_requests.ref_id', 'withdrawal_requests.mode', 'withdrawal_requests.w_type', 'withdrawal_requests.charge_percent', 'withdrawal_requests.member_id', 'withdrawal_requests.amount', 'withdrawal_requests.admin', 'withdrawal_requests.tds', 'withdrawal_requests.net', 'withdrawal_requests.rate', 'withdrawal_requests.payable', 'withdrawal_requests.address', 'withdrawal_requests.hash', 'withdrawal_requests.remark', 'withdrawal_requests.status', 'withdrawal_requests.created_at')
                                     ->with(array('member'=>function($query){
                                         $query->select('id', 'username', 'firstname', 'lastname');
                                     }))                        
@@ -49,12 +49,27 @@ class WithdrawalController extends Controller
                                     ->get(); 
         // Fetch records
         $data_arr = array();
+        $income_labels = config('income.withdrawal_income_types', []);
          
         foreach($records as $record){ 
+            if ($record->mode == 0) {
+                $income_name = $income_labels[$record->w_type] ?? ($record->w_type > 0 ? 'Income #'.$record->w_type : 'Earning');
+                $w_mode = '<b>Earning</b><br><small>'.$income_name.'</small>';
+                if ((float)$record->charge_percent <= 0 && (int)$record->w_type === 10) {
+                    $w_mode .= '<br><small style="color:green;">No Deduction</small>';
+                } elseif ($record->charge_percent !== null) {
+                    $w_mode .= '<br><small>Charge: '.$record->charge_percent.'%</small>';
+                }
+            } elseif ($record->mode == 1) {
+                $w_mode = '<b>Instant</b>';
+            } else {
+                $w_mode = '<b>Capital</b>';
+            }
+
             $data_arr[] = array(
                 "id" => $record->id,
                 "request_on" => date("d/m/Y H:i A", strtotime($record->created_at)),
-                "w_mode" => ($record->mode == 0 ? '<b>Earning</b>' : ($record->mode == 1 ? '<b>Instant</b>' : '<b>Capital</b>')),
+                "w_mode" => $w_mode,
                 "username" => obscureAddress($record->member->username),
                 "name" => $record->member->firstname.' '.$record->member->lastname,
                 "amount" => $record->amount,
