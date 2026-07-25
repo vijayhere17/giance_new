@@ -11,7 +11,8 @@ Use only:
 2. **SECOND** — SECTION B (`users` ALTER columns).
 3. **THIRD** — SECTION C (`turnover_reward_masters` + `turnover_reward_achievers` ALTER columns).
 4. **FOURTH** — SECTION D (index).
-5. **LAST** — SECTION E (UPDATE + INSERT Rewards 1–7).
+5. **LAST** — SECTION E (UPDATE + INSERT Rewards Ratio ranks 1–9: BEGINNER…EXCELLENT).
+   Or run standalone: `database/sql/2026_07_25_rewards_ratio_ladder.sql`
 
 ## Already exists (do not recreate)
 
