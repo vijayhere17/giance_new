@@ -651,82 +651,32 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h5>Reward Achievement</h5>
+                        <h5>Rewards Ratio</h5>
                     </div>
                     <div class="card-body table-border-style">
-                        <div class="row g-3 mt-0">
-                            <div class="col-sm-4">
-                                <div class="bg-body p-3 rounded">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <div class="flex-shrink-0">
-                                            <span class="p-1 d-block bg-primary rounded-circle">
-                                                <span class="visually-hidden">Leg 1 (40%)</span>
-                                            </span>
-                                        </div>
-                                        <div class="flex-grow-1 ms-2">
-                                            <p class="mb-0">Leg 1 (40%)</p>
-                                        </div>
-                                    </div>
-                                    <h6 class="mb-0">$ {{ number_format($object->leg_data['leg_1_business'], 2) }} <small class="text-muted">{{ $object->leg_data['leg_1_username'] }}</small></h6>
-                                </div>
-                            </div>
-                            <div class="col-sm-4">
-                                <div class="bg-body p-3 rounded">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <div class="flex-shrink-0">
-                                            <span class="p-1 d-block bg-warning rounded-circle">
-                                                <span class="visually-hidden">Leg 2 (30%)</span>
-                                            </span>
-                                        </div>
-                                        <div class="flex-grow-1 ms-2">
-                                            <p class="mb-0">Leg 2 (30%)</p>
-                                        </div>
-                                    </div>
-                                    <h6 class="mb-0">$ {{ number_format($object->leg_data['leg_2_business'], 2) }} <small class="text-muted">{{ $object->leg_data['leg_2_username'] }}</small>
-                                    </h6>
-                                </div>
-                            </div>
-                            <div class="col-sm-4">
-                                <div class="bg-body p-3 rounded">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <div class="flex-shrink-0">
-                                            <span class="p-1 d-block bg-success rounded-circle">
-                                                <span class="visually-hidden">Leg 3 (30%)</span>
-                                            </span>
-                                        </div>
-                                        <div class="flex-grow-1 ms-2">
-                                            <p class="mb-0">Leg 3 (30%)</p>
-                                        </div>
-                                    </div>
-                                    <h6 class="mb-0">$ {{ number_format($object->leg_data['leg_3_business'], 2) }} <small class="text-muted">{{ $object->leg_data['leg_3_username'] }}</small>
-                                    </h6>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row g-2 mt-3">
+                        <div class="row g-2 mt-0">
                             <div class="col-6 col-md-3">
                                 <div class="bg-body p-2 rounded text-center">
-                                    <small class="text-muted">Directs</small>
+                                    <small class="text-muted">Direct Referrals</small>
                                     <div><strong>{{ $object->reward_progress['directs'] }}</strong></div>
                                 </div>
                             </div>
                             <div class="col-6 col-md-3">
                                 <div class="bg-body p-2 rounded text-center">
-                                    <small class="text-muted">Team</small>
+                                    <small class="text-muted">Team Size</small>
                                     <div><strong>{{ $object->reward_progress['team'] }}</strong></div>
                                 </div>
                             </div>
                             <div class="col-6 col-md-3">
                                 <div class="bg-body p-2 rounded text-center">
-                                    <small class="text-muted">Self Business</small>
+                                    <small class="text-muted">Self Investment</small>
                                     <div><strong>${{ number_format($object->reward_progress['self_business'], 2) }}</strong></div>
                                 </div>
                             </div>
                             <div class="col-6 col-md-3">
                                 <div class="bg-body p-2 rounded text-center">
-                                    <small class="text-muted">Team Business</small>
-                                    <div><strong>${{ number_format($object->reward_progress['team_business'], 2) }}</strong></div>
+                                    <small class="text-muted">Total Business</small>
+                                    <div><strong>${{ number_format($object->reward_progress['total_business'] ?? (($object->reward_progress['self_business'] ?? 0) + ($object->reward_progress['team_business'] ?? 0)), 2) }}</strong></div>
                                 </div>
                             </div>
                         </div>
@@ -736,12 +686,13 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Reward</th>
+                                        <th>Rank</th>
                                         <th>Direct</th>
                                         <th>Team</th>
-                                        <th>Self Biz</th>
-                                        <th>Team Biz</th>
-                                        <th>Weekly Salary</th>
+                                        <th>Self Investment</th>
+                                        <th>Total Business</th>
+                                        <th>Salary / Week</th>
+                                        <th>Duration</th>
                                         <th>Status</th>
                                         <th>Achieve Date</th>
                                     </tr>
@@ -753,17 +704,20 @@
                                     @endphp
                                     <tr>
                                         <td>{{ $reward->milestone_order }}</td>
-                                        <td>{{ $reward->title ?: ('Reward '.$reward->milestone_order) }}</td>
+                                        <td><strong>{{ $reward->title ?: ('Rank '.$reward->milestone_order) }}</strong></td>
                                         <td>{{ $reward->required_directs }}</td>
-                                        <td>{{ $reward->required_team }}</td>
+                                        <td>{{ number_format($reward->required_team) }}</td>
                                         <td>${{ number_format($reward->required_self_business, 0) }}</td>
                                         <td>${{ number_format(($reward->required_team_business > 0 ? $reward->required_team_business : $reward->turnover_amount), 0) }}</td>
                                         <td>${{ number_format(($reward->weekly_salary > 0 ? $reward->weekly_salary : $reward->cash_reward), 0) }}</td>
+                                        <td>{{ $object->reward_salary_weeks ?? 12 }} Weeks</td>
                                         <td>
                                             @if($status == null)
                                                 <span class="badge bg-warning">Pending</span>
                                             @elseif((int)$status->status === 0)
                                                 <span class="badge bg-success">Active</span>
+                                            @elseif((int)$status->status === 2)
+                                                <span class="badge bg-primary">Completed</span>
                                             @else
                                                 <span class="badge bg-info">Achieved</span>
                                             @endif

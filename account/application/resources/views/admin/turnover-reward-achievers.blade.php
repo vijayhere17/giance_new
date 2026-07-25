@@ -27,11 +27,8 @@
 								<th>Weekly Salary</th>
 								<th>Directs</th>
 								<th>Team</th>
-								<th>Self Biz</th>
-								<th>Team Biz</th>
-								<th>Leg 1</th>
-								<th>Leg 2</th>
-								<th>Leg 3</th>
+								<th>Self Investment</th>
+								<th>Total Business</th>
 								<th>Status</th>
 								<th>Next Pay</th>
 								<th>Weeks Paid</th>
@@ -48,18 +45,17 @@
 								<td>{{ $a->team_count }}</td>
 								<td>${{ number_format($a->self_business, 2) }}</td>
 								<td>${{ number_format($a->team_business, 2) }}</td>
-								<td>${{ number_format($a->leg1_business, 2) }}</td>
-								<td>${{ number_format($a->leg2_business, 2) }}</td>
-								<td>${{ number_format($a->leg3_business, 2) }}</td>
 								<td>
 									@if((int)$a->status === 0)
 										<span class="label label-success">Active Salary</span>
+									@elseif((int)$a->status === 2)
+										<span class="label label-info">Completed 12 Weeks</span>
 									@else
 										<span class="label label-default">Superseded</span>
 									@endif
 								</td>
 								<td>{{ $a->return_date ? date('d/m/Y', strtotime($a->return_date)) : '-' }}</td>
-								<td>{{ $a->weeks_paid }}</td>
+								<td>{{ $a->weeks_paid }}/12</td>
 								<td>{{ date('d/m/Y H:i:s', strtotime($a->created_at)) }}</td>
 							</tr>
 							@endforeach

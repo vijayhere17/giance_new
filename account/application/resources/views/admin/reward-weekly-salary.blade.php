@@ -38,7 +38,7 @@
 								<td>${{ number_format($a->weekly_salary, 2) }}</td>
 								<td>{{ $a->return_date ? date('d/m/Y', strtotime($a->return_date)) : '-' }}</td>
 								<td>{{ $a->last_paid_at ? date('d/m/Y H:i:s', strtotime($a->last_paid_at)) : '-' }}</td>
-								<td>{{ $a->weeks_paid }}</td>
+								<td>{{ $a->weeks_paid }}/12</td>
 							</tr>
 							@endforeach
 						</tbody>
