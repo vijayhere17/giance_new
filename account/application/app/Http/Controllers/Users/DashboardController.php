@@ -105,7 +105,10 @@ class DashboardController extends Controller
         // Reward progress / achievement / weekly salary
         $rewardCon = app('App\Http\Controllers\Users\TurnoverRewardController');
         $object->reward_progress = $rewardCon->getRewardProgress($user_id);
-        $object->allrewards = TurnoverRewardMaster::where('milestone_order', '<=', 7)->orderBy('milestone_order', 'asc')->get();
+        $object->allrewards = TurnoverRewardMaster::where('milestone_order', '<=', (int) config('income.reward_max_milestone', 9))
+            ->orderBy('milestone_order', 'asc')
+            ->get();
+        $object->reward_salary_weeks = (int) config('income.reward_salary_weeks', 12);
         $object->reward_achievements = TurnoverRewardAchiever::where('member_id', '=', $user_id)->with('reward')->orderBy('id', 'asc')->get();
         $object->active_reward = $object->reward_achievements->where('status', 0)->sortByDesc('id')->first();
         $object->weekly_salary = $object->active_reward ? (float) $object->active_reward->weekly_salary : 0;

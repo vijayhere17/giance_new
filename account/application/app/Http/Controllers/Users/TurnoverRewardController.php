@@ -21,7 +21,9 @@ class TurnoverRewardController extends Controller
     {
         $page_titel = 'Reward Achievement';
 
-        $allrewards = TurnoverRewardMaster::where('milestone_order', '<=', 7)->orderBy('milestone_order', 'asc')->get();
+        $allrewards = TurnoverRewardMaster::where('milestone_order', '<=', (int) config('income.reward_max_milestone', 9))
+            ->orderBy('milestone_order', 'asc')
+            ->get();
 
         $user_id = Auth::user()->id;
 
@@ -31,6 +33,7 @@ class TurnoverRewardController extends Controller
         $achieved = TurnoverRewardAchiever::where('member_id', '=', $user_id)->get();
         $achieved_ids = $achieved->pluck('reward_id')->toArray();
         $active_achiever = $achieved->where('status', 0)->sortByDesc('id')->first();
+        $salary_weeks = (int) config('income.reward_salary_weeks', 12);
 
         return view('users.turnover-reward')->with([
             'page_titel' => $page_titel,
@@ -41,12 +44,12 @@ class TurnoverRewardController extends Controller
             'achieved' => $achieved,
             'active_achiever' => $active_achiever,
             'progress' => $progress,
+            'salary_weeks' => $salary_weeks,
         ])->toJS();
     }
 
     /**
-     * Top 3 sponsoring legs only (not binary).
-     * Leg volume = direct self_investment + direct team_investment.
+     * Top 3 sponsoring legs (display / optional legacy gate only).
      */
     public function getLegBusiness($member_id)
     {
@@ -85,6 +88,7 @@ class TurnoverRewardController extends Controller
 
         $self_business = (float) ($member->self_investment ?? 0);
         $team_business = (float) ($member->team_investment ?? 0);
+        $total_business = $self_business + $team_business;
 
         $legs = $this->getLegBusiness($member_id);
 
@@ -93,47 +97,51 @@ class TurnoverRewardController extends Controller
             'team' => $team,
             'self_business' => $self_business,
             'team_business' => $team_business,
+            'total_business' => $total_business,
             'legs' => $legs,
         ];
     }
 
+    /**
+     * Rewards Ratio qualification:
+     * Direct Referrals + Team Size + Self Investment + Total Business.
+     */
     private function qualifiesForReward($progress, $reward)
     {
-        $team_business = (float) ($reward->required_team_business > 0 ? $reward->required_team_business : $reward->turnover_amount);
-
-        $leg1_percent = config('income.reward_leg1_percent', 40);
-        $leg2_percent = config('income.reward_leg2_percent', 30);
-        $leg3_percent = config('income.reward_leg3_percent', 30);
-
-        $need_leg1 = $team_business * $leg1_percent / 100;
-        $need_leg2 = $team_business * $leg2_percent / 100;
-        $need_leg3 = $team_business * $leg3_percent / 100;
-
         $required_directs = (int) ($reward->required_directs ?? 0);
         $required_team = (int) ($reward->required_team ?? 0);
         $required_self = (float) ($reward->required_self_business ?? 0);
+        $required_total = (float) ($reward->required_team_business > 0 ? $reward->required_team_business : $reward->turnover_amount);
 
-        if($required_directs > 0 && $progress['directs'] < $required_directs)
-        {
+        if ($required_directs > 0 && $progress['directs'] < $required_directs) {
             return false;
         }
 
-        if($required_team > 0 && $progress['team'] < $required_team)
-        {
+        if ($required_team > 0 && $progress['team'] < $required_team) {
             return false;
         }
 
-        if($required_self > 0 && $progress['self_business'] < $required_self)
-        {
+        if ($required_self > 0 && $progress['self_business'] < $required_self) {
             return false;
         }
 
-        if($team_business > 0)
-        {
+        // Total Business = self + team volume
+        if ($required_total > 0 && ($progress['total_business'] ?? 0) < $required_total) {
+            return false;
+        }
+
+        // Optional legacy 40/30/30 leg gate (off by default for Rewards Ratio plan)
+        if (config('income.reward_use_leg_split', false) && $required_total > 0) {
+            $leg1_percent = config('income.reward_leg1_percent', 40);
+            $leg2_percent = config('income.reward_leg2_percent', 30);
+            $leg3_percent = config('income.reward_leg3_percent', 30);
+
             $legs = $progress['legs'];
-
-            if($legs['leg1_business'] < $need_leg1 || $legs['leg2_business'] < $need_leg2 || $legs['leg3_business'] < $need_leg3)
-            {
+            if (
+                $legs['leg1_business'] < ($required_total * $leg1_percent / 100) ||
+                $legs['leg2_business'] < ($required_total * $leg2_percent / 100) ||
+                $legs['leg3_business'] < ($required_total * $leg3_percent / 100)
+            ) {
                 return false;
             }
         }
@@ -141,35 +149,32 @@ class TurnoverRewardController extends Controller
         return true;
     }
 
-    // ==========================================================================================================================================================================================
-
     /**
-     * Daily reward qualification. Stores achievement + weekly salary schedule.
-     * Highest reward only receives weekly salary (status=0). No duplicate achievements.
+     * Daily reward qualification. Highest active reward receives weekly salary.
+     * Salary runs for reward_salary_weeks (12) then completes.
      */
     public function runTurnoverAchiever()
     {
-        $ladder = TurnoverRewardMaster::where('milestone_order', '<=', 7)->orderBy('milestone_order', 'asc')->get();
+        $max = (int) config('income.reward_max_milestone', 9);
+        $ladder = TurnoverRewardMaster::where('milestone_order', '<=', $max)
+            ->orderBy('milestone_order', 'asc')
+            ->get();
 
         $members = User::where('kit_id', '>', 0)->get();
 
-        foreach($members as $member)
-        {
+        foreach ($members as $member) {
             $progress = $this->getRewardProgress($member->id);
 
-            foreach($ladder as $reward)
-            {
+            foreach ($ladder as $reward) {
                 $already = TurnoverRewardAchiever::where('member_id', '=', $member->id)
                     ->where('reward_id', '=', $reward->id)
                     ->exists();
 
-                if($already)
-                {
+                if ($already) {
                     continue;
                 }
 
-                if(!$this->qualifiesForReward($progress, $reward))
-                {
+                if (!$this->qualifiesForReward($progress, $reward)) {
                     continue;
                 }
 
@@ -194,7 +199,7 @@ class TurnoverRewardController extends Controller
                     $achiever->directs_count = $progress['directs'];
                     $achiever->team_count = $progress['team'];
                     $achiever->self_business = $progress['self_business'];
-                    $achiever->team_business = $progress['team_business'];
+                    $achiever->team_business = $progress['total_business'];
                     $achiever->return_date = date('Y-m-d', strtotime('+7 days'));
                     $achiever->weeks_paid = 0;
                     $achiever->status = 0;
@@ -214,8 +219,8 @@ class TurnoverRewardController extends Controller
     }
 
     /**
-     * Pay weekly reward salary every 7 days for the highest active reward only.
-     * Respects 3X earning cap. Prevents duplicate salary for the same week.
+     * Pay weekly reward salary every 7 days for the highest active reward.
+     * Stops after reward_salary_weeks (12). Respects 3X earning cap.
      */
     public function runRewardSalary()
     {
@@ -223,16 +228,23 @@ class TurnoverRewardController extends Controller
         $walletCon = app('App\Http\Controllers\Users\EarningWalletController');
 
         $today = date('Y-m-d');
+        $max_weeks = (int) config('income.reward_salary_weeks', 12);
 
         $objects = TurnoverRewardAchiever::where('status', '=', 0)
             ->where('weekly_salary', '>', 0)
             ->where('return_date', '<=', $today)
             ->get();
 
-        foreach($objects as $log)
-        {
+        foreach ($objects as $log) {
             $reward = TurnoverRewardMaster::find($log->reward_id);
             $title = $reward ? ($reward->title ?: ('Reward #'.$reward->milestone_order)) : ('Reward #'.$log->reward_id);
+
+            // Already completed full salary cycle
+            if ((int) $log->weeks_paid >= $max_weeks) {
+                $log->status = 2;
+                $log->save();
+                continue;
+            }
 
             // Duplicate salary guard: already paid today
             $already_paid = EarningWallet::where('member_id', '=', $log->member_id)
@@ -242,46 +254,55 @@ class TurnoverRewardController extends Controller
                 ->where('description', 'like', 'Reward Salary - '.$title.'%')
                 ->exists();
 
-            if($already_paid)
-            {
+            if ($already_paid) {
                 continue;
             }
 
             // Also skip if last_paid_at is within last 6 days
-            if($log->last_paid_at != null && strtotime($log->last_paid_at) > strtotime('-6 days'))
-            {
+            if ($log->last_paid_at != null && strtotime($log->last_paid_at) > strtotime('-6 days')) {
                 continue;
             }
 
             $commission = (float) $log->weekly_salary;
-            $description = 'Reward Salary - '.$title.' (Weekly)';
+            $week_no = ((int) $log->weeks_paid) + 1;
+            $description = 'Reward Salary - '.$title.' (Week '.$week_no.'/'.$max_weeks.')';
 
             $remain_commission = $dashboardCon->check3xEarningLimit($log->member_id, $commission);
 
             try {
                 DB::beginTransaction();
 
-                // Lock row to prevent overlapping cron double-pay
                 $fresh = TurnoverRewardAchiever::where('id', $log->id)->where('status', 0)->lockForUpdate()->first();
 
-                if($fresh == null || ($fresh->return_date != null && $fresh->return_date > $today))
-                {
+                if ($fresh == null || ($fresh->return_date != null && $fresh->return_date > $today)) {
                     DB::rollBack();
                     continue;
                 }
 
-                if($remain_commission > 0)
-                {
-                    $walletCon->addearningwalletlog($log->member_id, 1, 7, $description, $remain_commission, 0, 0, date('Y-m-d H:i:s'));
+                if ((int) $fresh->weeks_paid >= $max_weeks) {
+                    $fresh->status = 2;
+                    $fresh->save();
+                    DB::commit();
+                    continue;
                 }
-                else
-                {
+
+                if ($remain_commission > 0) {
+                    $walletCon->addearningwalletlog($log->member_id, 1, 7, $description, $remain_commission, 0, 0, date('Y-m-d H:i:s'));
+                } else {
                     $walletCon->addearningwalletlog($log->member_id, 3, 7, $description, $commission, 0, 0, date('Y-m-d H:i:s'));
                 }
 
                 $fresh->weeks_paid = ((int) $fresh->weeks_paid) + 1;
                 $fresh->last_paid_at = date('Y-m-d H:i:s');
-                $fresh->return_date = date('Y-m-d', strtotime('+7 days'));
+
+                if ((int) $fresh->weeks_paid >= $max_weeks) {
+                    // Completed 12-week salary cycle
+                    $fresh->status = 2;
+                    $fresh->return_date = null;
+                } else {
+                    $fresh->return_date = date('Y-m-d', strtotime('+7 days'));
+                }
+
                 $fresh->save();
 
                 DB::commit();

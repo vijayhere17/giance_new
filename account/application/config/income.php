@@ -74,7 +74,14 @@ return [
     // booster_window_hours of own activation => 100% of own first topup credited once (earning_type 8)
     'booster_required_directs' => 3,
 
-    // Reward qualification - top 3 sponsoring legs (not binary)
+    // Reward Ratio salary duration (weeks) — matches Rewards Ratio plan
+    'reward_salary_weeks' => 12,
+
+    // Max ranks on Rewards Ratio ladder (BEGINNER … EXCELLENT)
+    'reward_max_milestone' => 9,
+
+    // Legacy leg-split gate (disabled — Rewards Ratio uses Directs/Team/Self/Total Business)
+    'reward_use_leg_split' => false,
     'reward_leg1_percent' => 40,
     'reward_leg2_percent' => 30,
     'reward_leg3_percent' => 30,

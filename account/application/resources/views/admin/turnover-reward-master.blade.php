@@ -15,7 +15,7 @@
 	<div class="col-md-12">
 		<div class="panel panel-primary" data-collapsed="0">
 			<div class="panel-heading">
-				<div class="panel-title">Reward Qualification Master</div>
+				<div class="panel-title">Rewards Ratio Master (Direct / Team / Self / Total Business — Salary 12 Weeks)</div>
 			</div>
 			<div class="panel-body">
 				<div class="table-responsive">
@@ -23,12 +23,12 @@
 						<thead>
 							<tr>
 								<th>#</th>
-								<th>Title</th>
+								<th>Rank</th>
 								<th>Direct</th>
 								<th>Team</th>
-								<th>Self Biz</th>
-								<th>Team Biz</th>
-								<th>Weekly Salary</th>
+								<th>Self Investment</th>
+								<th>Total Business</th>
+								<th>Salary / Week</th>
 								<th></th>
 							</tr>
 						</thead>
@@ -83,13 +83,13 @@
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="col-sm-3 control-label">Self Business ($)</label>
+						<label class="col-sm-3 control-label">Self Investment ($)</label>
 						<div class="col-sm-5">
 							<input name="required_self_business" type="number" step="0.01" class="form-control" required>
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="col-sm-3 control-label">Team Business ($)</label>
+						<label class="col-sm-3 control-label">Total Business ($)</label>
 						<div class="col-sm-5">
 							<input name="required_team_business" type="number" step="0.01" class="form-control" required>
 						</div>

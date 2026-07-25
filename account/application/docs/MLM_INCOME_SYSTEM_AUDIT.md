@@ -15,7 +15,7 @@
 
 ### Backend (extend existing — no duplicate modules)
 - `app/Http/Controllers/Users/StakeController.php` — Locked Reward allocate/unlock/expiry; ROI Override 200 levels + direct rules
-- `app/Http/Controllers/Users/TurnoverRewardController.php` — Reward qualification (7 rewards), weekly salary, top-3 legs 40/30/30
+- `app/Http/Controllers/Users/TurnoverRewardController.php` — Rewards Ratio (9 ranks), weekly salary × 12 weeks, Direct/Team/Self/Total Business
 - `app/Http/Controllers/Users/DashboardController.php` — Income + locked reward + reward progress summary
 - `app/Http/Controllers/Users/SignupController.php` — Registration fee $1
 - `app/Http/Controllers/Admin/TurnoverRewardController.php` — Reward master/achievers/weekly salary/locked reports
@@ -76,7 +76,8 @@ Package Activation (setStakeActivation)
 
 Daily Cron (act:processdaily) — single scheduler, no duplicate
   ├─ Mon–Fri → runDailyROI → processlevelcommission (200 levels / ROI Override)
-  ├─ runTurnoverAchiever → qualify Rewards 1–7 (Direct/Team/Self/Team Biz + legs 40/30/30)
+  ├─ runTurnoverAchiever → qualify Rewards Ratio ranks (Direct/Team/Self/Total Business)
+  ├─ runRewardSalary → weekly pay for 12 weeks then status=2 Completed
   ├─ runRewardSalary → pay weekly salary (highest only, 3X cap, duplicate guards)
   └─ runLockedRewardExpiry → remaining locked → expired (unlocked forever)
 ```
