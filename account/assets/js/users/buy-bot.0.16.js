@@ -154,6 +154,14 @@ async function processstake()
         return false;
     }
 
+    if (PHP2JS.data.reactivation && PHP2JS.data.reactivation.required) {
+        var minReactivate = parseFloat(PHP2JS.data.reactivation.min_amount || 0);
+        if (parseFloat(amount) < minReactivate) {
+            erroralert('Reactivation required: please topup $' + minReactivate.toFixed(2) + ' or higher.');
+            return false;
+        }
+    }
+
     const pkg_min = parseFloat($("input[name='package']:checked").attr('minamount'));
     const pkg_max = parseFloat($("input[name='package']:checked").attr('maxamount'));
 

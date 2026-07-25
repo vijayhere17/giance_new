@@ -91,9 +91,14 @@ return [
     'locked_reward_validity_days' => 30,
     'locked_reward_unlock_percent' => 10,
 
-    // Earning cap multipliers
+    // Earning cap multipliers (income generation ceiling)
     'working_cap_multiplier' => 3,
     'non_working_cap_multiplier' => 2,
+
+    // Reactivation rule: once returns reach 150% of total investment, withdrawals are blocked
+    // until the member tops up with same-or-higher package value vs last package.
+    'reactivation_return_multiplier' => 1.5,
+    'reactivation_block_withdrawals' => true,
 
     // Withdrawal terms
     'withdrawal_min_amount' => 10,

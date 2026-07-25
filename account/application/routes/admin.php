@@ -4,13 +4,9 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes
+| Admin Routes — current ROI investment plan only
+| Legacy MLM routes (binary/DMC/bonanza/sunday/cashback/travel/swap) removed from active map.
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
 */
 
 Route::controller(App\Http\Controllers\Admin\LoginController::class)->group(function()
@@ -30,9 +26,6 @@ Route::middleware('adminauth:admin')->group(function () {
 
         Route::get('coin-rate-set', 'coinrateset');
         Route::post('process-update-coin-rate', "changeCoinRate");
-        
-        Route::get('potential-withdrawal-settings', 'pwSettings');
-        Route::post('process-potential-settings', "potentialSettings");
     });
 
     Route::controller(App\Http\Controllers\Admin\StakeReportController::class)->group(function()
@@ -42,97 +35,49 @@ Route::middleware('adminauth:admin')->group(function () {
 
         Route::get('user-staked-report', 'userStakedReport');
         Route::get('get-staked-report', 'getStakedReport');
-        
-        Route::get('downline-business-report', 'downlineBusinessReport');
-        Route::post('check-downline-business', "checkDownlineBusiness");
-        Route::get('get-downline-business-report', 'getDownlineBusinessReport');
-        
-        //
-        
+
         Route::get('manual-topup', 'newTopup');
         Route::post('process-manual-topup', "adminStakeIDs");
-        
+
         Route::get('new-package', 'newAddPack');
         Route::post('process-new-package', "addPackage");
-        
-        Route::get('new-travel-package', 'newAddTravelPack');
-        Route::post('process-new-travel-package', "addTravelPackage");
-        
-        // Route::get('process-get-update-dmc', "tempUpdateDMCCount");
-        
+
+        // Capital withdrawal ops
         Route::get('user-staked-withdrawal', 'userStakedWithdrawal');
         Route::get('get-staked-withdrawal', 'getStakedWithdrawalReport');
         Route::post('process-staked-withdrawal-req', "actionCapitalWithdraw");
-        
-        Route::get('add-level-achievement', 'userSetLeveLAchievement');
-        Route::post('process-add-achievement', 'actionAddLevel');
-        
-        Route::get('add-power', 'userAddPower');
-        Route::post('process-add-power', 'actionAddPower');
-        
-        //
-        
-        Route::get('wallet-staked-report', 'userWalletStakedReport');
-        Route::get('get-wallet-staked-report', 'getWalletStakedReport');
-        
-        //
+
         Route::get('all-packages', 'allPackages');
         Route::get('get-all-packages-report', 'getAllPackagesReport');
-        
+
         Route::post('update-package/{id}', 'update');
         Route::post('add-new-package', 'store');
-        
     });
-    
+
     Route::controller(App\Http\Controllers\Admin\MemberController::class)->group(function()
     {
         Route::get('member-report', 'index');
         Route::get('get-member-report', 'getMemberReport');
         Route::post('process-back-login', 'backLogin');
-        
+
         Route::get('edit-{id}-profile', 'editmember');
         Route::post('process-update-member', 'updateMemberDetails');
-    });
-    
-    Route::controller(App\Http\Controllers\Admin\CashbackController::class)->group(function()
-    {
-        Route::get('set-cashback', 'index');
-        Route::post('process-set-cashback', 'setCashback');
-        
-        Route::get('get-cashback-user-report', 'getCashbackUserReport');
     });
 
     Route::controller(App\Http\Controllers\Admin\EarningReportController::class)->group(function()
     {
         Route::get('cradit-debit-master', 'craditdebitMaster');
         Route::post('process-cradit-debit-master', 'actionCraditDebit');
-        
+
         Route::get('cradit-debit-report', 'craditdebitReport');
         Route::get('get-cradit-debit-report', 'getCraditDebitReport');
-        
+
         Route::get('outstanding-balance', 'balanceReport');
         Route::get('get-balance-report', 'getBalanceReport');
-        
+
+        // Plan incomes only: 1 Direct, 2 ROI, 4 Team Level, 7 Reward Salary, 8 Booster, 10 Bonus Income
         Route::get('earning-report/{status}/{title}', 'earningReport');
         Route::get('get-earning-report', 'getEarningReport');
-        Route::get('get-dmc-earning-report', 'getDMCEarningReport');
-    });  
-    
-    Route::controller(App\Http\Controllers\Admin\SalaryController::class)->group(function()
-    {
-        Route::get('potential-achiever', 'index');
-        
-        Route::get('get-dmc-achievers', 'getAchieverReport');
-        
-        Route::get('malaysia-achiever', 'indexMA');
-        
-        Route::get('get-malaysia-achievers', 'getMAchieverReport');
-        
-        Route::get('baku-achiever', 'indexBA');
-        
-        Route::get('get-baku-achievers', 'getBAchieverReport');
-        
-        // Route::post('process-set-dmc-level', 'setDMCAchievement');
     });
 
     Route::controller(App\Http\Controllers\Admin\RoiTierController::class)->group(function()
@@ -161,45 +106,16 @@ Route::middleware('adminauth:admin')->group(function () {
         Route::post('process-withdrawal-request', "withdrawalReqAction");
         Route::post('process-manual-withdrawal-request', "withdrawalReqActionManual");
     });
-    
-    Route::controller(App\Http\Controllers\Admin\BonanzaController::class)->group(function()
-    {
-        Route::get('bonanza-achievers', 'indexachievers');
-        Route::get('get-bonanza-achievers', 'getAchieverReport');
-        
-        //
-        
-        Route::get('ge-left-and-right-dmc', 'getleftandrightdmc');
-    });
-    
-    Route::controller(App\Http\Controllers\Admin\SundayController::class)->group(function()
-    {
-        Route::get('create-new-offres', 'createoffres');
-        Route::post('submit-create-new-offers', 'addNewOffers');
-        Route::post('submit-add-winners', 'addWinners');
-        Route::post('submit-close-winners', 'updateWinners');
-        
-        //
-        
-        Route::get('get-offers-list', 'getOffersReport');
-    });
-    
+
     Route::controller(App\Http\Controllers\Admin\TicketController::class)->group(function()
     {
         Route::get('support-ticket', 'index');
-        
+
         Route::get('get-all-support-ticket', 'getAllSupportTicket');
 
         Route::post('process-view-ticket-message', "AdminViewTicketMessage");
-        
+
         Route::post('process-send-ticket-message', "AdminSendTicketMessage");
-    });
-    
-    Route::controller(App\Http\Controllers\Admin\SwapController::class)->group(function()
-    {
-        Route::get('swap-txn-logs', 'index');
-        
-        Route::get('get-swap-txn-logs', 'getAllSwapTxnList');
     });
 
     Route::get('logout', function () {

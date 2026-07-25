@@ -81,6 +81,11 @@ class StakeController extends Controller
     })
     ->first();
 
+        $dashboardCon = app('App\Http\Controllers\Users\DashboardController');
+        $reactivation = Auth::check()
+            ? $dashboardCon->getReactivationStatus(Auth::user()->id)
+            : ['required' => false, 'min_amount' => 0, 'message' => ''];
+
         return view('users.buy-bot')->with([
     'page_titel'=>$page_titel,
     'coin_rate'=>$coin_rate,
@@ -88,7 +93,8 @@ class StakeController extends Controller
     'usdt_con_addr'=>$usdt_con_addr,
     'usdt_con_abi'=>$usdt_con_abi,
     'to_address'=>$to_address,
-    'currentMonthlyROI'=>$currentMonthlyROI
+    'currentMonthlyROI'=>$currentMonthlyROI,
+    'reactivation'=>$reactivation,
 ])->toJS();
     }
     
@@ -139,6 +145,17 @@ class StakeController extends Controller
             if(!is_numeric($amount) || (float)$amount < $topup_min)
             {
                 return response()->json(array('success'=>false, 'error'=>'Minimum topup amount is $'.number_format($topup_min, 0).'.'), 200);
+            }
+
+            // If 150% reactivation is required, topup must be same-or-higher than last package.
+            $dashboardCon = app('App\Http\Controllers\Users\DashboardController');
+            $reactivation = $dashboardCon->getReactivationStatus(Auth::user()->id);
+            if (!empty($reactivation['required']) && (float)$amount < (float)$reactivation['min_amount'])
+            {
+                return response()->json(array(
+                    'success' => false,
+                    'error' => 'Reactivation required: please topup $'.number_format((float)$reactivation['min_amount'], 2).' or higher.',
+                ), 200);
             }
 
             // Rate comes from the amount actually paid, not the client-selected package.
@@ -298,6 +315,16 @@ class StakeController extends Controller
             if(!is_numeric($amount) || (float)$amount < $topup_min)
             {
                 return response()->json(array('success'=>false, 'error'=>'Minimum topup amount is $'.number_format($topup_min, 0).'.'), 200);
+            }
+
+            $dashboardCon = app('App\Http\Controllers\Users\DashboardController');
+            $reactivation = $dashboardCon->getReactivationStatus($userid);
+            if (!empty($reactivation['required']) && (float)$amount < (float)$reactivation['min_amount'])
+            {
+                return response()->json(array(
+                    'success' => false,
+                    'error' => 'Reactivation required: please topup $'.number_format((float)$reactivation['min_amount'], 2).' or higher.',
+                ), 200);
             }
 
             // Rate comes from the amount actually paid, not the client-selected package.

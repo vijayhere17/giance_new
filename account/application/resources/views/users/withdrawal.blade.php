@@ -53,6 +53,17 @@
                                         </div>
                                     </div>
 
+                                    @if(!empty($reactivation['required']))
+                                    <div class="col-md-12">
+                                        <div class="alert alert-danger py-2 mb-0">
+                                            <strong>Reactivation Required</strong><br>
+                                            {{ $reactivation['message'] ?? 'Withdrawals are disabled until you reactivate with same or higher package.' }}
+                                            <br>
+                                            <a href="{{ URL::to('/') }}/buy-robo" class="btn btn-sm btn-warning mt-2">Topup / Reactivate Now</a>
+                                        </div>
+                                    </div>
+                                    @endif
+
                                     <div class="col-md-12">
                                         <div class="form-group mb-0">
                                             <label class="form-label" for="income_type">Select Withdrawal Type</label>
@@ -135,5 +146,5 @@
 </div>
 @endsection
 @section('jscontent')
-<script src="{{ URL::to('/') }}/assets/js/users/withdrawal.0.13.js?v=3"></script>
+<script src="{{ URL::to('/') }}/assets/js/users/withdrawal.0.13.js?v=4"></script>
 @endsection
