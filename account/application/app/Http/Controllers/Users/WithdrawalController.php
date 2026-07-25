@@ -26,7 +26,8 @@ class WithdrawalController extends Controller
 
         $balance = $walletCon->getearningbalance($member_id);
         $income_options = $walletCon->getWithdrawIncomeOptions($member_id);
-        $charge_percent = $this->resolveWithdrawalChargePercent($member_id, 0, 0);
+        $charge_percent = (float) config('income.withdrawal_admin_fee_percent', 15);
+        $min_amount = (float) config('income.withdrawal_min_amount', 10);
         
         $wallet_addr = Auth::user()->username;
         
@@ -39,6 +40,7 @@ class WithdrawalController extends Controller
             'coin_rate' => $coin_rate,
             'income_options' => $income_options,
             'charge_percent' => $charge_percent,
+            'min_amount' => $min_amount,
             'zero_fee_types' => config('income.withdrawal_zero_fee_types', [10]),
         ])->toJS();
     }
@@ -64,7 +66,7 @@ class WithdrawalController extends Controller
         $page_titel = 'Withdrawal Report';  
         $txn_hash_url = 'https://bscscan.com/tx';
         $income_labels = config('income.withdrawal_buckets', [
-            10 => 'Locked Reward Unlock',
+            10 => 'Bonus Income',
             0 => 'Other Incomes',
         ]);
         return view('users.withdrawal-request')->with([
@@ -116,11 +118,11 @@ class WithdrawalController extends Controller
                 return response()->json(array('success'=>false,'error'=> 'Unauthorized withdrawal!'), 200);
             }
 
-            $allowed_types = array_map('intval', array_keys(config('income.withdrawal_buckets', [10 => 'Locked Reward Unlock', 0 => 'Other Incomes'])));
+            $allowed_types = array_map('intval', array_keys(config('income.withdrawal_buckets', [10 => 'Bonus Income', 0 => 'Other Incomes'])));
             $income_type = (int) $data['income_type'];
             if (!in_array($income_type, $allowed_types, true))
             {
-                return response()->json(array('success'=>false,'error'=> 'Please select Locked Unlock or Other Incomes.'), 200);
+                return response()->json(array('success'=>false,'error'=> 'Please select Bonus Income or Other Incomes.'), 200);
             }
             
             $balance = $walletCon->getearningbalance($userid);
@@ -138,9 +140,10 @@ class WithdrawalController extends Controller
             }
             
             $usd_amount = formatdecimal($data["amount"], 4);
-            if($usd_amount < 5)
+            $min_amount = (float) config('income.withdrawal_min_amount', 10);
+            if($usd_amount < $min_amount)
             {
-                return response()->json(array('success'=>false,'error'=> 'Minimum withdrawal $5'), 200);
+                return response()->json(array('success'=>false,'error'=> 'Minimum withdrawal $'.number_format($min_amount, 0)), 200);
             }
             
             /* $chk_retopup = $dashboardCon->checkearninglimit($userid, $usd_amount);
@@ -365,9 +368,7 @@ class WithdrawalController extends Controller
         return $object;
     }
 
-    // Withdrawal charge: Locked Unlock (and other zero-fee types) = 0%.
-    // Other incomes use tiers by days since last non-rejected withdrawal of same mode:
-    // <30 days = 10%, <60 days = 5%, >=60 days = 0%.
+    // Withdrawal charge: Bonus Income (type 10) = 0%. All other earning withdrawals = flat 15%.
     private function resolveWithdrawalChargePercent($member_id, $mode, $earning_type = 0)
     {
         $zero_fee = config('income.withdrawal_zero_fee_types', [10]);
@@ -376,30 +377,7 @@ class WithdrawalController extends Controller
             return 0;
         }
 
-        $member = User::find($member_id);
-
-        $last = WithdrawalLog::where('member_id', '=', $member_id)
-                    ->where('mode', '=', $mode)
-                    ->where('status', '!=', 3)
-                    ->orderBy('created_at', 'desc')
-                    ->first();
-
-        $anchor = $last ? $last->created_at : ($member ? $member->activation_date : null);
-
-        $days_elapsed = $anchor ? floor((strtotime(date('Y-m-d H:i:s')) - strtotime($anchor)) / 86400) : 0;
-
-        $tiers = config('income.withdrawal_charge_tiers');
-        krsort($tiers);
-
-        foreach($tiers as $threshold_days => $percent)
-        {
-            if($days_elapsed >= $threshold_days)
-            {
-                return $percent;
-            }
-        }
-
-        return 10;
+        return (float) config('income.withdrawal_admin_fee_percent', 15);
     }
     
     // ========================================================================================================================================================================

@@ -95,7 +95,12 @@ return [
     'working_cap_multiplier' => 3,
     'non_working_cap_multiplier' => 2,
 
-    // Withdrawal charge tiers (income withdrawals), days elapsed => charge percent
+    // Withdrawal terms
+    'withdrawal_min_amount' => 10,
+    // Flat admin fee (%) on normal withdrawals (Bonus Income = 0%)
+    'withdrawal_admin_fee_percent' => 15,
+
+    // Legacy tiers kept unused (flat fee above is active)
     'withdrawal_charge_tiers' => [
         60 => 0,
         30 => 5,
@@ -103,14 +108,14 @@ return [
     ],
 
     // Withdrawal buckets (only two options on member withdraw form)
-    // 10 = Locked Reward Unlock (no admin charge)
-    // 0  = Other Incomes total / pooled (normal charge tiers)
+    // 10 = Bonus Income (Locked Reward Unlock) — 0% fee, anytime
+    // 0  = Other Incomes total — 15% admin fee
     'withdrawal_buckets' => [
-        10 => 'Locked Reward Unlock',
+        10 => 'Bonus Income',
         0  => 'Other Incomes',
     ],
 
-    // Locked Unlock withdrawals have no admin charge
+    // Bonus Income withdrawals have no admin charge
     'withdrawal_zero_fee_types' => [10],
 
     // Labels used on reports for income earning_types
@@ -122,8 +127,11 @@ return [
         7  => 'Reward Salary',
         8  => 'Booster Income',
         9  => 'Life Time Reward',
-        10 => 'Locked Reward Unlock',
+        10 => 'Bonus Income',
     ],
+
+    // Topup Now
+    'topup_min_amount' => 10,
 
     // Capital withdrawal
     'capital_withdrawal_charge_percent' => 30,

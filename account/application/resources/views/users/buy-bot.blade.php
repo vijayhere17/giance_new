@@ -97,7 +97,8 @@ $
 </span>
 </li>
                             <li class="list-group-item enable">Daily Income : $<span id="txt_daily_income">0.00</span></li>
-                            <li class="list-group-item">Note : Enter a stake amount only $50 multiple</li>
+                            <li class="list-group-item">Note : Enter a top up amount $10 to unlimited.</li>
+                            <li class="list-group-item text-muted">ROI Policy : ROI is generated Monday to Friday only (not on Saturday/Sunday).</li>
                         </ul>
 
                         <br>
@@ -139,7 +140,7 @@ $
 <script>
 window.monthlyROI = {{ $currentMonthlyROI ? $currentMonthlyROI->daily_roi : 0 }};
 </script>
-<script src="{{ URL::to('/') }}/assets/js/users/buy-bot.0.15.js?v=5"></script>
+<script src="{{ URL::to('/') }}/assets/js/users/buy-bot.0.16.js?v=1"></script>
 <script>
     connectwallet();
 </script>

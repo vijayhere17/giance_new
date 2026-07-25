@@ -50,18 +50,19 @@ class WithdrawalController extends Controller
         // Fetch records
         $data_arr = array();
         $income_labels = config('income.withdrawal_buckets', [
-            10 => 'Locked Reward Unlock',
+            10 => 'Bonus Income',
             0 => 'Other Incomes',
         ]);
          
         foreach($records as $record){ 
             if ($record->mode == 0) {
-                $income_name = $income_labels[$record->w_type] ?? ((int)$record->w_type === 10 ? 'Locked Reward Unlock' : 'Other Incomes');
+                $income_name = $income_labels[$record->w_type] ?? ((int)$record->w_type === 10 ? 'Bonus Income' : 'Other Incomes');
                 $w_mode = '<b>Earning</b><br><small>'.$income_name.'</small>';
                 if ((int)$record->w_type === 10) {
-                    $w_mode .= '<br><small style="color:green;">No Deduction</small>';
-                } elseif ($record->charge_percent !== null) {
-                    $w_mode .= '<br><small>Charge: '.$record->charge_percent.'%</small>';
+                    $w_mode .= '<br><small style="color:green;">No Deduction (0%)</small>';
+                } else {
+                    $fee = $record->charge_percent !== null ? $record->charge_percent : config('income.withdrawal_admin_fee_percent', 15);
+                    $w_mode .= '<br><small>Admin Fee: '.$fee.'%</small>';
                 }
             } elseif ($record->mode == 1) {
                 $w_mode = '<b>Instant</b>';

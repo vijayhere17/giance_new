@@ -12,7 +12,7 @@ function incomeLabel(w_type) {
     if (labels[w_type] !== undefined) {
         return labels[w_type];
     }
-    return parseInt(w_type, 10) === 10 ? 'Locked Reward Unlock' : 'Other Incomes';
+    return parseInt(w_type, 10) === 10 ? 'Bonus Income' : 'Other Incomes';
 }
 
 function initiateDataTable() {
