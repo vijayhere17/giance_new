@@ -389,6 +389,14 @@
                                 </div>
                             </div>
                         </div>
+                        @if(!empty($object->reactivation['required']))
+                        <div class="alert alert-danger mt-2 mb-0">
+                            <strong>Reactivation Required (150%)</strong><br>
+                            {{ $object->reactivation['message'] }}
+                            <br>
+                            <a href="{{ URL::to('/') }}/buy-robo" class="btn btn-sm btn-warning mt-2">Topup / Reactivate</a>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>

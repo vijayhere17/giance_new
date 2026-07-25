@@ -84,6 +84,7 @@ class DashboardController extends Controller
         $object->total_80x_remain = $this->get80XLimitWarning($user_id);
         
         $object->total_max_earning = $this->maxEarning($user_id, 3);
+        $object->reactivation = $this->getReactivationStatus($user_id);
         
         $object->current_rank = SalaryMaster::find(Auth::user()->salary_id);
         $object->achieve_rank = SalaryAchiever::where('member_id','=',$user_id)->where('salary_id','=',Auth::user()->salary_id)->first();
@@ -244,6 +245,57 @@ class DashboardController extends Controller
 	    {
 	        return 0;
 	    }
+	}
+
+	/**
+	 * 150% reactivation status.
+	 * When total_earning >= total_investment × 1.5, withdrawals are blocked until the member
+	 * purchases a same-or-higher package (increasing investment above the 150% threshold).
+	 */
+	public function getReactivationStatus($member_id)
+	{
+		$multiplier = (float) config('income.reactivation_return_multiplier', 1.5);
+		$member = User::find($member_id);
+
+		$invested = (float) UserStaked::where('member_id', $member_id)->sum('paid_amount');
+		$earned = (float) ($member->total_earning ?? 0);
+		$limit = $invested * $multiplier;
+
+		$lastStake = UserStaked::where('member_id', $member_id)
+			->orderBy('created_at', 'desc')
+			->orderBy('id', 'desc')
+			->first();
+
+		$min_amount = $lastStake ? (float) $lastStake->paid_amount : 0;
+
+		$required = ($invested > 0 && $earned >= $limit);
+
+		$message = '';
+		if ($required) {
+			$message = 'Your package has generated 150% returns. Please reactivate by purchasing a package of $'
+				.number_format($min_amount, 2)
+				.' or higher. Withdrawals are disabled until reactivation.';
+		}
+
+		return [
+			'required' => $required,
+			'invested' => $invested,
+			'earned' => $earned,
+			'limit' => $limit,
+			'min_amount' => $min_amount,
+			'percent' => $invested > 0 ? min(100, round(($earned / ($invested * $multiplier)) * 100, 2)) : 0,
+			'message' => $message,
+		];
+	}
+
+	public function requiresReactivation($member_id)
+	{
+		if (!config('income.reactivation_block_withdrawals', true)) {
+			return false;
+		}
+
+		$status = $this->getReactivationStatus($member_id);
+		return !empty($status['required']);
 	}
 	
 	public function check2xEarningLimit($member_id, $amount)

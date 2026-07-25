@@ -1,6 +1,11 @@
 jQuery(document).ready(function() {
     $(".balance").text(PHP2JS.data.balance);
 
+    if (PHP2JS.data.reactivation && PHP2JS.data.reactivation.required) {
+        $(".btn-submit").prop('disabled', true).addClass('disabled');
+        $("#amount, #income_type").prop('disabled', true);
+    }
+
     document.getElementById('with_wallet').readOnly = true;
     document.getElementById('admin_charge').readOnly = true;
     document.getElementById('net_amount').readOnly = true;
@@ -99,6 +104,11 @@ jQuery('.btn-submit').bind('click', function(e) {
 });
 
 function validate(otpstatus) {
+    if (PHP2JS.data.reactivation && PHP2JS.data.reactivation.required) {
+        erroralert(PHP2JS.data.reactivation.message || 'Reactivation required before withdrawal.');
+        return false;
+    }
+
     var selected = getSelectedIncome();
     var amount = $("#amount").val();
     var wallet = $("#with_wallet").val();

@@ -67,6 +67,14 @@
                         <div class="alert alert-info">
                             <strong>USDT (BEP20) Live Rate : </strong>$<span>{{ $coin_rate }}</span>
                         </div>
+
+                        @if(!empty($reactivation['required']))
+                        <div class="alert alert-warning">
+                            <strong>Reactivation Required</strong><br>
+                            {{ $reactivation['message'] }}
+                            <br><small>Minimum topup for reactivation: <b>${{ number_format((float)($reactivation['min_amount'] ?? 0), 2) }}</b></small>
+                        </div>
+                        @endif
                         
                         <div class="col-md-12">
                             <x-input type="text" name="topup_amount" id="topup_amount" placeholder="Topup Amount ($)" value="" />
@@ -140,7 +148,7 @@ $
 <script>
 window.monthlyROI = {{ $currentMonthlyROI ? $currentMonthlyROI->daily_roi : 0 }};
 </script>
-<script src="{{ URL::to('/') }}/assets/js/users/buy-bot.0.16.js?v=1"></script>
+<script src="{{ URL::to('/') }}/assets/js/users/buy-bot.0.16.js?v=2"></script>
 <script>
     connectwallet();
 </script>

@@ -157,6 +157,11 @@
 									<span class="title">Stake Report</span>
 								</a> 
 							</li>
+							<li> 
+								<a href="{{ URL::to('/') }}/admin/user-staked-withdrawal">
+									<span class="title">Capital Withdrawal</span>
+								</a> 
+							</li>
 						</ul> 
 					</li>
 										
@@ -211,18 +216,8 @@
 								</a>
 							</li>
 							<li>
-								<a href="{{ URL::to('/') }}/admin/earning-report/10/Locked Reward Unlock">
-									<span class="title">Locked Reward Unlock</span>
-								</a>
-							</li>
-							<li>
-								<a href="{{ URL::to('/') }}/admin/earning-report/3/Cashback">
-									<span class="title">Cashback</span>
-								</a>
-							</li>
-							<li>
-								<a href="{{ URL::to('/') }}/admin/earning-report/9/Life Time">
-									<span class="title">Life Time</span>
+								<a href="{{ URL::to('/') }}/admin/earning-report/10/Bonus Income">
+									<span class="title">Bonus Income</span>
 								</a>
 							</li>
 						</ul> 
@@ -256,7 +251,7 @@
 							</li>
 							<li>
 								<a href="{{ URL::to('/') }}/admin/locked-reward-report">
-									<span class="title">Locked / Unlocked / Expired</span>
+									<span class="title">Bonus / Locked Reward</span>
 								</a>
 							</li>
 						</ul>

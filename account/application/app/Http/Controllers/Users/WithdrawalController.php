@@ -28,6 +28,8 @@ class WithdrawalController extends Controller
         $income_options = $walletCon->getWithdrawIncomeOptions($member_id);
         $charge_percent = (float) config('income.withdrawal_admin_fee_percent', 15);
         $min_amount = (float) config('income.withdrawal_min_amount', 10);
+        $dashboardCon = app('App\Http\Controllers\Users\DashboardController');
+        $reactivation = $dashboardCon->getReactivationStatus($member_id);
         
         $wallet_addr = Auth::user()->username;
         
@@ -41,6 +43,7 @@ class WithdrawalController extends Controller
             'income_options' => $income_options,
             'charge_percent' => $charge_percent,
             'min_amount' => $min_amount,
+            'reactivation' => $reactivation,
             'zero_fee_types' => config('income.withdrawal_zero_fee_types', [10]),
         ])->toJS();
     }
@@ -116,6 +119,13 @@ class WithdrawalController extends Controller
             if($member->w_status > 0)
             {
                 return response()->json(array('success'=>false,'error'=> 'Unauthorized withdrawal!'), 200);
+            }
+
+            // 150% reactivation: block all withdrawals until same/higher package topup
+            $reactivation = $dashboardCon->getReactivationStatus($userid);
+            if (!empty($reactivation['required']))
+            {
+                return response()->json(array('success'=>false,'error'=> $reactivation['message']), 200);
             }
 
             $allowed_types = array_map('intval', array_keys(config('income.withdrawal_buckets', [10 => 'Bonus Income', 0 => 'Other Incomes'])));
