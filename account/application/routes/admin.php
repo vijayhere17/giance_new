@@ -42,10 +42,6 @@ Route::middleware('adminauth:admin')->group(function () {
         Route::get('new-package', 'newAddPack');
         Route::post('process-new-package', "addPackage");
 
-        // Capital withdrawal ops
-        Route::get('user-staked-withdrawal', 'userStakedWithdrawal');
-        Route::get('get-staked-withdrawal', 'getStakedWithdrawalReport');
-        Route::post('process-staked-withdrawal-req', "actionCapitalWithdraw");
 
         Route::get('all-packages', 'allPackages');
         Route::get('get-all-packages-report', 'getAllPackagesReport');
@@ -75,7 +71,7 @@ Route::middleware('adminauth:admin')->group(function () {
         Route::get('outstanding-balance', 'balanceReport');
         Route::get('get-balance-report', 'getBalanceReport');
 
-        // Plan incomes only: 1 Direct, 2 ROI, 4 Team Level, 7 Reward Salary, 8 Booster, 10 Bonus Income
+        // Plan incomes only: 10 Bonus, 2 ROI Bonus, 4 Level, 7 Rewards
         Route::get('earning-report/{status}/{title}', 'earningReport');
         Route::get('get-earning-report', 'getEarningReport');
     });
@@ -100,6 +96,7 @@ Route::middleware('adminauth:admin')->group(function () {
 
     Route::controller(App\Http\Controllers\Admin\WithdrawalController::class)->group(function()
     {
+        Route::get('withdrawal-management', 'indexManagement');
         Route::get('withdrawal-request/{status}/{title}', 'indexReport');
         Route::get('get-withdrawal-report', 'getWithdrawRequest');
 

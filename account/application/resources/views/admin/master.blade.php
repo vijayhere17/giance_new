@@ -157,11 +157,6 @@
 									<span class="title">Stake Report</span>
 								</a> 
 							</li>
-							<li> 
-								<a href="{{ URL::to('/') }}/admin/user-staked-withdrawal">
-									<span class="title">Capital Withdrawal</span>
-								</a> 
-							</li>
 						</ul> 
 					</li>
 										
@@ -191,33 +186,23 @@
 						</a> 
 						<ul> 
 							<li>
-								<a href="{{ URL::to('/') }}/admin/earning-report/1/Direct Sponsor Income">
-									<span class="title">Direct Sponsor Income</span>
-								</a>
-							</li>
-							<li>
-								<a href="{{ URL::to('/') }}/admin/earning-report/2/Daily ROI">
-									<span class="title">Daily ROI</span>
-								</a>
-							</li>
-							<li>
-								<a href="{{ URL::to('/') }}/admin/earning-report/8/Booster Income">
-									<span class="title">Booster Income</span>
-								</a>
-							</li>
-							<li>
-								<a href="{{ URL::to('/') }}/admin/earning-report/4/Team Level ROI Income">
-									<span class="title">Team Level ROI Income</span>
-								</a>
-							</li>
-							<li>
-								<a href="{{ URL::to('/') }}/admin/earning-report/7/Reward Salary">
-									<span class="title">Reward Salary</span>
-								</a>
-							</li>
-							<li>
 								<a href="{{ URL::to('/') }}/admin/earning-report/10/Bonus Income">
 									<span class="title">Bonus Income</span>
+								</a>
+							</li>
+							<li>
+								<a href="{{ URL::to('/') }}/admin/earning-report/2/ROI Bonus Income">
+									<span class="title">ROI Bonus Income</span>
+								</a>
+							</li>
+							<li>
+								<a href="{{ URL::to('/') }}/admin/earning-report/4/Level Income">
+									<span class="title">Level Income</span>
+								</a>
+							</li>
+							<li>
+								<a href="{{ URL::to('/') }}/admin/earning-report/7/Rewards">
+									<span class="title">Rewards</span>
 								</a>
 							</li>
 						</ul> 
@@ -265,32 +250,10 @@
 					</li>
 					
 					<li class="has-sub root-level"> 
-						<a href="javascript:">
+						<a href="{{ URL::to('/') }}/admin/withdrawal-management">
 							<i class="entypo-archive"></i>
-							<span class="title">Withdrawal Requests</span>
+							<span class="title">Withdrawal Request Management</span>
 						</a> 
-						<ul> 
-							<li> 
-								<a href="{{ URL::to('/') }}/admin/withdrawal-request/0/Pending">
-									<span class="title">Pending Request</span>
-								</a> 
-							</li> 
-							<li> 
-								<a href="{{ URL::to('/') }}/admin/withdrawal-request/1/Processing">
-									<span class="title">Processing Request</span>
-								</a> 
-							</li> 
-							<li> 
-								<a href="{{ URL::to('/') }}/admin/withdrawal-request/2/Success">
-									<span class="title">Success Request</span>
-								</a> 
-							</li> 
-							<li> 
-								<a href="{{ URL::to('/') }}/admin/withdrawal-request/3/Faield">
-									<span class="title">Failed Request</span>
-								</a> 
-							</li> 
-						</ul> 
 					</li>
 					
 					<li><a href="{{ URL::to('/') }}/admin/support-ticket"><i class="entypo-ticket"></i><span>Support Ticket</span></a></li>

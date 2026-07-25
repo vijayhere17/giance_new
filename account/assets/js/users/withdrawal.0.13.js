@@ -210,7 +210,9 @@ function resetformdata(balance, income_options) {
     $select.append('<option value="">-- Select --</option>');
 
     (income_options || []).forEach(function(opt) {
-        var feeNote = opt.zero_fee ? ' — No Deduction' : ' — With Deduction';
+        var feeNote = opt.zero_fee
+            ? ' — 0% fee'
+            : (' — ' + parseFloat(PHP2JS.data.charge_percent || 15) + '% fee');
         $select.append(
             $('<option></option>')
                 .attr('value', opt.id)

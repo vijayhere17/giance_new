@@ -205,13 +205,10 @@
                             <span class="pc-arrow"><i data-feather="chevron-right"></i></span>
                         </a>
                         <ul class="pc-submenu">
-                            <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/earning/1/Direct Income">Direct Income</a></li>
-                            <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/earning/2/Daily ROI Income">Daily ROI Income</a></li>
-                            <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/earning/4/Team Level ROI Income">Team Level ROI Income</a></li>
-                            <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/earning/8/Booster Income">Booster Income</a></li>
-                            <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/earning/7/Reward Salary">Reward Salary</a></li>
-                            <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/earning/10/Locked Reward Unlock">Locked Reward Unlock</a></li>
-                            <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/earning/9/Life Time Reward">Life Time Reward</a></li>
+                            <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/earning/10/Bonus Income">Bonus Income</a></li>
+                            <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/earning/2/ROI Bonus Income">ROI Bonus Income</a></li>
+                            <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/earning/4/Level Income">Level Income</a></li>
+                            <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/earning/7/Rewards">Rewards</a></li>
                         </ul>
                     </li>
                     
@@ -228,7 +225,7 @@
                         </a>
                         <ul class="pc-submenu">
                             <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/new-withdrawal">Withdrawal USDT</a></li>
-                            <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/withdrawal-request">Withdrawal Report</a></li>
+                            <li class="pc-item"><a class="pc-link" href="{{ URL::to('/') }}/withdrawal-request">Withdrawal History</a></li>
                         </ul>
                     </li>
                     

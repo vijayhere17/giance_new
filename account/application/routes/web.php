@@ -171,11 +171,7 @@ Route::group(['middleware' => 'auth'], function ()
     {
         Route::get('new-withdrawal', 'index')->name('new-withdrawal');
         Route::post('process-withdrawal-request','submitWithdrawalRequest');
-        
-        //
-        Route::get('potential-withdrawal', 'indexPotential')->name('potential-withdrawal');
-        Route::post('process-potential-withdrawal-request','submitPotentialWithdrawalRequest');
-        
+
         Route::get('withdrawal-request', 'indexreport')->name('withdrawal-request');
         Route::get('get-withdrawal-request', 'withdrawalReport');
     });
