@@ -104,7 +104,7 @@ function validate(otpstatus) {
     var wallet = $("#with_wallet").val();
 
     if (!selected) {
-        erroralert('Please select Locked Unlock or Other Incomes.');
+        erroralert('Please select Bonus Income or Other Incomes.');
         return false;
     }
 
@@ -120,6 +120,12 @@ function validate(otpstatus) {
 
     if (parseFloat(amount) <= 0) {
         erroralert('Please enter a valid amount.');
+        return false;
+    }
+
+    var minAmount = parseFloat(PHP2JS.data.min_amount || 10);
+    if (parseFloat(amount) < minAmount) {
+        erroralert('Minimum withdrawal $' + minAmount);
         return false;
     }
 

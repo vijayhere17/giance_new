@@ -46,12 +46,18 @@ class ProcessDaily extends Command
        	// $stakeCon->runReferralEarning();
 		// Log::info('process referral end...');
 
-		// ROI accrues Monday-Friday only - date('N') is 6=Saturday, 7=Sunday.
+		// ROI Policy: ROI is generated Monday to Friday only.
+		// ROI is not credited on Saturdays and Sundays (date('N') 6=Sat, 7=Sun).
+		// Users can still register and use the platform normally on weekends.
 		if(!in_array(date('N'), [6, 7]))
 		{
 			Log::info('process daily roi start...');
 			$stakeCon->runDailyROI();
 			Log::info('process daily roi end...');
+		}
+		else
+		{
+			Log::info('ROI skipped (weekend) — Monday to Friday only.');
 		}
 
 		// Reward Qualification (daily)

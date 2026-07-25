@@ -134,10 +134,11 @@ class StakeController extends Controller
             $status = $request->get('status');
             $hash = $request->get('hash');
 
-            // Server-side mirror of the client rule so direct API calls can't bypass it.
-            if(!is_numeric($amount) || $amount < 50 || fmod((float)$amount, 50) != 0.0)
+            // Topup: $10 to unlimited (no $50-multiple rule).
+            $topup_min = (float) config('income.topup_min_amount', 10);
+            if(!is_numeric($amount) || (float)$amount < $topup_min)
             {
-                return response()->json(array('success'=>false, 'error'=>'Topup amount must be a multiple of $50 (minimum $50).'), 200);
+                return response()->json(array('success'=>false, 'error'=>'Minimum topup amount is $'.number_format($topup_min, 0).'.'), 200);
             }
 
             // Rate comes from the amount actually paid, not the client-selected package.
@@ -292,10 +293,11 @@ class StakeController extends Controller
             $payment = $request->get('payment');
             $amount = $request->get('amount');
 
-            // Server-side mirror of the client rule so direct API calls can't bypass it.
-            if(!is_numeric($amount) || $amount < 50 || fmod((float)$amount, 50) != 0.0)
+            // Topup: $10 to unlimited (no $50-multiple rule).
+            $topup_min = (float) config('income.topup_min_amount', 10);
+            if(!is_numeric($amount) || (float)$amount < $topup_min)
             {
-                return response()->json(array('success'=>false, 'error'=>'Topup amount must be a multiple of $50 (minimum $50).'), 200);
+                return response()->json(array('success'=>false, 'error'=>'Minimum topup amount is $'.number_format($topup_min, 0).'.'), 200);
             }
 
             // Rate comes from the amount actually paid, not the client-selected package.

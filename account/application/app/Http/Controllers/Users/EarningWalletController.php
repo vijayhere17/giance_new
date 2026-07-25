@@ -207,7 +207,7 @@ class EarningWalletController extends Controller
         if ($locked > 0) {
             $options[] = [
                 'id' => 10,
-                'name' => config('income.withdrawal_buckets.10', 'Locked Reward Unlock'),
+                'name' => config('income.withdrawal_buckets.10', 'Bonus Income'),
                 'balance' => $locked,
                 'zero_fee' => true,
             ];

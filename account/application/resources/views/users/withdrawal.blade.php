@@ -67,7 +67,20 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <small class="text-muted income-type-hint">Only 2 options: <b>Locked Reward Unlock</b> (no deduction) or <b>Other Incomes</b> total (with deduction).</small>
+                                        <small class="text-muted income-type-hint">Select <b>Bonus Income</b> (0% fee) or <b>Other Incomes</b> ({{ (float)($charge_percent ?? 15) }}% admin fee).</small>
+                                    </div>
+
+                                    <div class="col-md-12">
+                                        <div class="alert alert-secondary py-2 mb-0">
+                                            <strong>Withdrawal Terms</strong>
+                                            <ul class="mb-0 mt-1 ps-3">
+                                                <li>Minimum withdrawal: ${{ number_format((float)($min_amount ?? 10), 0) }}.</li>
+                                                <li>{{ (float)($charge_percent ?? 15) }}% administrative fee applies to all withdrawals (except Bonus Income).</li>
+                                                <li>Bonus Income is available for withdrawal at any time with 0% withdrawal fees.</li>
+                                                <li>Withdrawals are available exclusively via USDT (BEP-20).</li>
+                                                <li>All approved withdrawal requests are processed and credited to your wallet within 24 hours.</li>
+                                            </ul>
+                                        </div>
                                     </div>
 
                                     <div class="col-md-12">
@@ -122,5 +135,5 @@
 </div>
 @endsection
 @section('jscontent')
-<script src="{{ URL::to('/') }}/assets/js/users/withdrawal.0.13.js?v=2"></script>
+<script src="{{ URL::to('/') }}/assets/js/users/withdrawal.0.13.js?v=3"></script>
 @endsection
