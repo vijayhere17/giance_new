@@ -31,8 +31,14 @@ return [
     // Registration fee (USD) - recorded at signup; package activation remains unchanged.
     'registration_fee' => 1,
 
-    // Company receiving wallet for Registration Fee + Topup (USDT BEP20 transfers)
-    'deposit_wallet' => '0x5a0fc2285a37c1682dc3f351ca59a043b1a41050',
+    // Company receiving wallets (USDT BEP20)
+    // Registration fee payments go here
+    'registration_wallet' => '0x56e5b44e4D718116c8471B7dbe56EbB21D3E19F4',
+    // Topup / package activation payments go here
+    'topup_wallet' => '0xa9097bdBDfDCD91F4e12BC04682da52DaB6016b0',
+
+    // Legacy alias (kept for older references) — prefer registration_wallet / topup_wallet
+    'deposit_wallet' => '0xa9097bdBDfDCD91F4e12BC04682da52DaB6016b0',
 
     // USDT (BEP20) on BSC mainnet - 18 decimals
     'usdt_contract' => '0x55d398326f99059fF775485246999027B3197955',

@@ -236,7 +236,7 @@
     <script src="{{ URL::to('/') }}/assets/common/js/common.0.8.js"></script>
     <script>
         window.REG_FEE_CONFIG = {
-            to_address: @json($to_address ?? config('income.deposit_wallet')),
+            to_address: @json($to_address ?? config('income.registration_wallet')),
             usdt_con_addr: @json($usdt_con_addr ?? config('income.usdt_contract')),
             usdt_con_abi: @json($usdt_con_abi ?? '[]'),
             registration_fee: {{ (float)($registration_fee ?? config('income.registration_fee', 1)) }}
