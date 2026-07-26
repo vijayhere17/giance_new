@@ -114,24 +114,33 @@ return [
 
     // Withdrawal buckets (only two options on member withdraw form)
     // 10 = Bonus Income (Locked Reward Unlock) — 0% fee, anytime
-    // 0  = Other Incomes total — 15% admin fee
+    // 0  = Other Incomes (ROI Bonus + Level Income + Rewards) — 15% admin fee
     'withdrawal_buckets' => [
         10 => 'Bonus Income',
         0  => 'Other Incomes',
     ],
 
+    // Earning types that make up "Other Incomes" withdrawable balance
+    // 2 = ROI Bonus Income, 4 = Level Income, 7 = Rewards
+    'withdrawal_other_income_types' => [2, 4, 7],
+
     // Bonus Income withdrawals have no admin charge
     'withdrawal_zero_fee_types' => [10],
+
+    // Member panel income menus / labels (current business plan — 4 incomes only)
+    'member_income_types' => [
+        10 => 'Bonus Income',
+        2  => 'ROI Bonus Income',
+        4  => 'Level Income',
+        7  => 'Rewards',
+    ],
 
     // Labels used on reports for income earning_types
     'withdrawal_income_types' => [
         0  => 'Other Incomes',
-        1  => 'Direct Sponsor Income',
-        2  => 'Daily ROI Income',
-        4  => 'Team Level ROI Income',
-        7  => 'Reward Salary',
-        8  => 'Booster Income',
-        9  => 'Life Time Reward',
+        2  => 'ROI Bonus Income',
+        4  => 'Level Income',
+        7  => 'Rewards',
         10 => 'Bonus Income',
     ],
 

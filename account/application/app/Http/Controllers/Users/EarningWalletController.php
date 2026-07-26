@@ -36,16 +36,14 @@ class EarningWalletController extends Controller
         $member_id = Auth::user()->id;
         $logtype = (int) $logtype;
 
-        // Normalize page titles for final business plan naming (UI only)
-        $title_map = [
-            1 => 'Direct Income',
-            2 => 'Daily ROI Income',
-            4 => 'Team Level ROI Income',
-            7 => 'Reward Salary',
-            9 => 'Life Time Reward',
-            10 => 'Locked Reward Unlock',
-        ];
-        if(isset($title_map[$logtype]))
+        // Normalize page titles for current business plan naming (UI only)
+        $title_map = config('income.member_income_types', [
+            10 => 'Bonus Income',
+            2  => 'ROI Bonus Income',
+            4  => 'Level Income',
+            7  => 'Rewards',
+        ]);
+        if (isset($title_map[$logtype]))
         {
             $page_titel = $title_map[$logtype];
         }
@@ -67,10 +65,10 @@ class EarningWalletController extends Controller
         $package_amount = $latest_package ? (float) $latest_package->paid_amount : 0;
 
         $history_title = 'Income History';
-        if($logtype == 2) { $history_title = 'ROI History'; }
-        if($logtype == 4) { $history_title = 'Team Level ROI History'; }
-        if($logtype == 7) { $history_title = 'Reward Salary History'; }
-        if($logtype == 10) { $history_title = 'Locked Reward Unlock History'; }
+        if ($logtype == 2) { $history_title = 'ROI Bonus Income History'; }
+        if ($logtype == 4) { $history_title = 'Level Income History'; }
+        if ($logtype == 7) { $history_title = 'Rewards History'; }
+        if ($logtype == 10) { $history_title = 'Bonus Income History'; }
 
         return view('users.earning-wise-log')->with([
             'page_titel' => $page_titel,
@@ -184,46 +182,67 @@ class EarningWalletController extends Controller
         return formatdecimal(min($type_balance, $wallet_balance), 4);
     }
 
-    // Locked Unlock available balance (earning_type 10)
+    // Bonus Income available balance (earning_type 10)
     public function getLockedUnlockBalance($member_id)
     {
         return $this->getIncomeTypeBalance($member_id, 10);
     }
 
-    // Other incomes total = wallet balance minus Locked Unlock available
+    // Other Incomes = ROI Bonus (2) + Level Income (4) + Rewards (7),
+    // minus typed debits and Other-bucket withdrawal debits (earning_type 0).
     public function getOtherIncomesBalance($member_id)
     {
-        $wallet = (float) $this->getearningbalance($member_id);
-        $locked = (float) $this->getLockedUnlockBalance($member_id);
-        return formatdecimal(max(0, $wallet - $locked), 4);
+        $types = config('income.withdrawal_other_income_types', [2, 4, 7]);
+
+        $credit = (float) EarningWallet::where('member_id', $member_id)
+                    ->where('txn_type', 1)
+                    ->whereIn('earning_type', $types)
+                    ->sum('amount');
+
+        $debit_typed = (float) EarningWallet::where('member_id', $member_id)
+                    ->where('txn_type', 2)
+                    ->whereIn('earning_type', $types)
+                    ->sum('amount');
+
+        // Other Incomes withdrawals / refunds are booked against earning_type 0
+        $debit_bucket = (float) EarningWallet::where('member_id', $member_id)
+                    ->where('txn_type', 2)
+                    ->where('earning_type', 0)
+                    ->where('description', 'like', 'Withdrawal%')
+                    ->sum('amount');
+
+        $credit_bucket_refund = (float) EarningWallet::where('member_id', $member_id)
+                    ->where('txn_type', 1)
+                    ->where('earning_type', 0)
+                    ->where('description', 'like', 'Withdrawal%')
+                    ->sum('amount');
+
+        $type_balance = max(0, $credit - $debit_typed - $debit_bucket + $credit_bucket_refund);
+        $wallet_balance = (float) $this->getearningbalance($member_id);
+
+        return formatdecimal(min($type_balance, $wallet_balance), 4);
     }
 
-    // Only two withdraw options: Locked Unlock (no fee) + Other Incomes total (with fee)
+    // Only two withdraw options: Bonus Income (no fee) + Other Incomes (with fee)
     public function getWithdrawIncomeOptions($member_id)
     {
-        $options = [];
-
         $locked = (float) $this->getLockedUnlockBalance($member_id);
-        if ($locked > 0) {
-            $options[] = [
+        $other = (float) $this->getOtherIncomesBalance($member_id);
+
+        return [
+            [
                 'id' => 10,
                 'name' => config('income.withdrawal_buckets.10', 'Bonus Income'),
                 'balance' => $locked,
                 'zero_fee' => true,
-            ];
-        }
-
-        $other = (float) $this->getOtherIncomesBalance($member_id);
-        if ($other > 0) {
-            $options[] = [
+            ],
+            [
                 'id' => 0,
                 'name' => config('income.withdrawal_buckets.0', 'Other Incomes'),
                 'balance' => $other,
                 'zero_fee' => false,
-            ];
-        }
-
-        return $options;
+            ],
+        ];
     }
 
     public function getWithdrawBucketBalance($member_id, $bucket)

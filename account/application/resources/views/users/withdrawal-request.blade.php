@@ -12,12 +12,12 @@
                         <ul class="breadcrumb">
                             <li class="breadcrumb-item"><a href="{{ URL::to('/') }}/dashboard">Dashboard</a></li>
                             <li class="breadcrumb-item"><a href="javascript:">Withdrawal</a></li>
-                            <li class="breadcrumb-item" aria-current="page">Withdrawal Report</li>
+                            <li class="breadcrumb-item" aria-current="page">Withdrawal History</li>
                         </ul>
                     </div>
                     <div class="col-md-12">
                         <div class="page-header-title">
-                            <h2 class="mb-0">Withdrawal Report</h2>
+                            <h2 class="mb-0">Withdrawal History</h2>
                         </div>
                     </div>
                 </div>
@@ -26,11 +26,16 @@
         <!-- [ breadcrumb ] end -->
 
         <div class="row">
-            <!-- [ form-element ] start -->
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header">
-                        <h5>Withdrawal Report</h5>
+                    <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <h5 class="mb-0">Withdrawal History</h5>
+                        <div class="btn-group" role="group" aria-label="Status filter">
+                            <button type="button" class="btn btn-sm btn-outline-secondary status-filter active" data-status="">All</button>
+                            <button type="button" class="btn btn-sm btn-outline-warning status-filter" data-status="pending">Pending</button>
+                            <button type="button" class="btn btn-sm btn-outline-success status-filter" data-status="approved">Approved</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger status-filter" data-status="rejected">Rejected</button>
+                        </div>
                     </div>
                     <div class="card-body table-border-style">
                         <div class="table-responsive">
@@ -54,11 +59,11 @@
                         </div>
                     </div>
                 </div>
-            </div> 
+            </div>
         </div>
     </div>
 </div>
 @endsection
 @section('jscontent')
-<script src="{{ URL::to('/') }}/assets/js/users/withdrawal-request.0.9.js?v=1"></script>
+<script src="{{ URL::to('/') }}/assets/js/users/withdrawal-request.0.10.js?v=1"></script>
 @endsection

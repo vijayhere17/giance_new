@@ -608,44 +608,26 @@
                             </div>
                             <div class="col-6 col-md-4 col-xl-2">
                                 <div class="bg-body p-3 rounded">
-                                    <p class="mb-0 text-muted">Direct Income</p>
-                                    <h5 class="mb-0">${{ $object->total_referral_bonus }}</h5>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-4 col-xl-2">
-                                <div class="bg-body p-3 rounded">
-                                    <p class="mb-0 text-muted">Daily ROI Income</p>
-                                    <h5 class="mb-0">${{ $object->total_daily_roi_bonus }}</h5>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-4 col-xl-2">
-                                <div class="bg-body p-3 rounded">
-                                    <p class="mb-0 text-muted">Team Level ROI Income</p>
-                                    <h5 class="mb-0">${{ $object->total_team_level_bonus }}</h5>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-4 col-xl-2">
-                                <div class="bg-body p-3 rounded">
-                                    <p class="mb-0 text-muted">Reward Salary</p>
-                                    <h5 class="mb-0">${{ $object->total_reward_salary }}</h5>
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-4 col-xl-2">
-                                <div class="bg-body p-3 rounded">
-                                    <p class="mb-0 text-muted">Locked Unlock</p>
+                                    <p class="mb-0 text-muted">Bonus Income</p>
                                     <h5 class="mb-0">${{ $object->total_locked_unlock_bonus }}</h5>
                                 </div>
                             </div>
                             <div class="col-6 col-md-4 col-xl-2">
                                 <div class="bg-body p-3 rounded">
-                                    <p class="mb-0 text-muted">Life Time Reward</p>
-                                    <h5 class="mb-0">${{ $object->total_lifetime_bonus }}</h5>
+                                    <p class="mb-0 text-muted">ROI Bonus Income</p>
+                                    <h5 class="mb-0">${{ $object->total_daily_roi_bonus }}</h5>
                                 </div>
                             </div>
                             <div class="col-6 col-md-4 col-xl-2">
                                 <div class="bg-body p-3 rounded">
-                                    <p class="mb-0 text-muted">Weekly Salary</p>
-                                    <h5 class="mb-0">${{ number_format($object->weekly_salary, 2) }}</h5>
+                                    <p class="mb-0 text-muted">Level Income</p>
+                                    <h5 class="mb-0">${{ $object->total_team_level_bonus }}</h5>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4 col-xl-2">
+                                <div class="bg-body p-3 rounded">
+                                    <p class="mb-0 text-muted">Rewards</p>
+                                    <h5 class="mb-0">${{ $object->total_reward_salary }}</h5>
                                 </div>
                             </div>
                         </div>

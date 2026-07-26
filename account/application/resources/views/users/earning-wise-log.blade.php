@@ -99,7 +99,7 @@
                     <div class="card mb-0">
                         <div class="card-body">
                             <div class="bg-body p-3 rounded">
-                                <p class="mb-0 text-muted">Today's Reward Salary</p>
+                                <p class="mb-0 text-muted">Today's Rewards</p>
                                 <h5 class="mb-0 text-primary">${{ $today_sum }}</h5>
                             </div>
                         </div>
@@ -109,7 +109,7 @@
                     <div class="card mb-0">
                         <div class="card-body">
                             <div class="bg-body p-3 rounded">
-                                <p class="mb-0 text-muted">Total Reward Salary</p>
+                                <p class="mb-0 text-muted">Total Rewards</p>
                                 <h5 class="mb-0 text-primary">${{ $total_sum }}</h5>
                             </div>
                         </div>
@@ -120,7 +120,7 @@
                     <div class="card mb-0">
                         <div class="card-body">
                             <div class="bg-body p-3 rounded">
-                                <p class="mb-0 text-muted">Today's Unlock</p>
+                                <p class="mb-0 text-muted">Today's Bonus Income</p>
                                 <h5 class="mb-0 text-primary">${{ $today_sum }}</h5>
                             </div>
                         </div>
@@ -130,7 +130,7 @@
                     <div class="card mb-0">
                         <div class="card-body">
                             <div class="bg-body p-3 rounded">
-                                <p class="mb-0 text-muted">Total Unlocked</p>
+                                <p class="mb-0 text-muted">Total Bonus Income</p>
                                 <h5 class="mb-0 text-primary">${{ $total_sum }}</h5>
                             </div>
                         </div>

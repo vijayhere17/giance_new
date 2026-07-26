@@ -66,7 +66,7 @@ class WithdrawalController extends Controller
     }
     
     public function indexreport(){
-        $page_titel = 'Withdrawal Report';  
+        $page_titel = 'Withdrawal History';
         $txn_hash_url = 'https://bscscan.com/tx';
         $income_labels = config('income.withdrawal_buckets', [
             10 => 'Bonus Income',
@@ -82,10 +82,21 @@ class WithdrawalController extends Controller
     // =========================================================================================================================================================================
     
     public function withdrawalReport(Request $request){
-        $objects = WithdrawalLog::where('member_id', Auth::user()->id)
-                                ->orderBy('created_at','desc')
-                                ->get();
-        return Datatables::of($objects)->make(true);
+        $query = WithdrawalLog::where('member_id', Auth::user()->id)
+                                ->where('mode', 0)
+                                ->orderBy('created_at', 'desc');
+
+        // pending = 0,1 | approved = 2 | rejected = 3
+        $status_filter = strtolower((string) $request->get('status_filter', ''));
+        if ($status_filter === 'pending') {
+            $query->whereIn('status', [0, 1]);
+        } elseif ($status_filter === 'approved') {
+            $query->where('status', 2);
+        } elseif ($status_filter === 'rejected') {
+            $query->where('status', 3);
+        }
+
+        return Datatables::of($query)->make(true);
     }
     
     // action method -----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -190,9 +201,8 @@ class WithdrawalController extends Controller
                 $log = $walletCon->addearningwalletlog($userid, 2, $income_type, $debit_description, $usd_amount, $coin_rate, $data["amount"], date("Y-m-d H:i:s")); 
                 
                 $wlog = $this->addwithdrawallog($log->id, $userid, $data["amount"], $coin_rate, formatdecimal($data["amount"]/$coin_rate, 8), $walletAddress, 0, $income_type);
-                
-                // send withdrawal request
-                $this->instantAutoWithdrawal($wlog->id);
+
+                // Keep request Pending for admin approve/reject (no auto-pay)
                 
                 $balance = $walletCon->getearningbalance($userid);
                 $income_options = $walletCon->getWithdrawIncomeOptions($userid);
