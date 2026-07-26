@@ -42,7 +42,7 @@ class SignupController extends Controller
         $page_titel = 'Sign Up';
         $stakeCon = app('App\Http\Controllers\Users\StakeController');
 
-        $to_address = $stakeCon->getDepositWallet();
+        $to_address = $stakeCon->getRegistrationWallet();
         $usdt_con_addr = $stakeCon->getUsdtContract();
         $usdt_con_abi = $stakeCon->getUsdtAbi();
         $registration_fee = (float) config('income.registration_fee', 1);
@@ -150,7 +150,7 @@ class SignupController extends Controller
                     'member_id' => $member->id,
                     'wallet' => $cleanString,
                     'fee' => $umember->registration_fee,
-                    'to' => config('income.deposit_wallet'),
+                    'to' => config('income.registration_wallet'),
                     'hash' => $data['registration_hash'],
                 ]);
             }

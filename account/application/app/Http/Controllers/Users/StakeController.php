@@ -27,7 +27,14 @@ class StakeController extends Controller
     //
     protected function depositaddress()
     {
-        return config('income.deposit_wallet', '0x5a0fc2285a37c1682dc3f351ca59a043b1a41050');
+        // Topup receiving wallet
+        return config('income.topup_wallet', config('income.deposit_wallet', '0xa9097bdBDfDCD91F4e12BC04682da52DaB6016b0'));
+    }
+
+    protected function registrationaddress()
+    {
+        // Registration fee receiving wallet
+        return config('income.registration_wallet', '0x56e5b44e4D718116c8471B7dbe56EbB21D3E19F4');
     }
 
     protected function contractabi(){
@@ -41,6 +48,16 @@ class StakeController extends Controller
     }
 
     public function getDepositWallet()
+    {
+        return $this->depositaddress();
+    }
+
+    public function getRegistrationWallet()
+    {
+        return $this->registrationaddress();
+    }
+
+    public function getTopupWallet()
     {
         return $this->depositaddress();
     }
