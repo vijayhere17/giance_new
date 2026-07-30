@@ -430,13 +430,7 @@ class StakeController extends Controller
     // Rate is always derived server-side from the amount actually paid - never trust a client-supplied kit_id for rate.
     public function resolveRoiTierKit($amount)
     {
-        $tier = RoiTierMaster::where('is_active', 1)
-                    ->where('min_amount', '<=', $amount)
-                    ->where(function($q) use ($amount) {
-                        $q->whereNull('max_amount')->orWhere('max_amount', '>=', $amount);
-                    })
-                    ->orderBy('min_amount', 'desc')
-                    ->first();
+        $tier = $this->resolveRoiTierForAmount($amount);
 
         if($tier == null)
         {
@@ -446,7 +440,34 @@ class StakeController extends Controller
         // stake_masters.percantage is a float column - comparing it to a decimal exactly can miss due to
         // float storage rounding (e.g. 0.3 stored as 0.30000001192...), so round both sides before matching.
         return StakeMaster::where('ptype', 2)
-                    ->whereRaw('ROUND(percantage, 3) = ?', [$tier->daily_percent])
+                    ->whereRaw('ROUND(percantage, 3) = ?', [round((float) $tier->daily_percent, 3)])
+                    ->first();
+    }
+
+    /**
+     * Find active ROI tier for an amount.
+     * 1) Exact range match (min <= amount <= max / open-ended)
+     * 2) Fallback: nearest lower active tier by min_amount (avoids hard fail on tiny gaps)
+     */
+    public function resolveRoiTierForAmount($amount)
+    {
+        $amount = (float) $amount;
+
+        $tier = RoiTierMaster::where('is_active', 1)
+                    ->where('min_amount', '<=', $amount)
+                    ->where(function($q) use ($amount) {
+                        $q->whereNull('max_amount')->orWhere('max_amount', '>=', $amount);
+                    })
+                    ->orderBy('min_amount', 'desc')
+                    ->first();
+
+        if ($tier != null) {
+            return $tier;
+        }
+
+        return RoiTierMaster::where('is_active', 1)
+                    ->where('min_amount', '<=', $amount)
+                    ->orderBy('min_amount', 'desc')
                     ->first();
     }
 
@@ -747,47 +768,41 @@ class StakeController extends Controller
         $object->payable_coin = $paid_coin;
 
         if($kit->ptype == 2)
-{
-    $roi_tier = RoiTierMaster::where('is_active', 1)
-                    ->where('min_amount', '<=', $amount)
-                    ->where(function ($q) use ($amount) {
-                        $q->whereNull('max_amount')
-                          ->orWhere('max_amount', '>=', $amount);
-                    })
-                    ->first();
+        {
+            $roi_tier = $this->resolveRoiTierForAmount($amount);
 
-    if (!$roi_tier) {
-        throw new \Exception('ROI Tier not found.');
-    }
+            if (!$roi_tier) {
+                throw new \Exception('ROI Tier not found for amount $'.$amount.'. Please configure continuous ranges in roi_tier_masters (from $10).');
+            }
 
-    // Find current month's ROI
-    $monthlyROI = \App\Models\MonthlyROIRate::where('status', 1)
-        ->whereDate('start_date', '<=', now())
-        ->where(function ($q) {
-            $q->whereDate('end_date', '>=', now())
-              ->orWhereNull('end_date');
-        })
-        ->first();
+            // Find current month's ROI
+            $monthlyROI = \App\Models\MonthlyROIRate::where('status', 1)
+                ->whereDate('start_date', '<=', now())
+                ->where(function ($q) {
+                    $q->whereDate('end_date', '>=', now())
+                      ->orWhereNull('end_date');
+                })
+                ->first();
 
-    if (!$monthlyROI) {
-        throw new \Exception('Monthly ROI not configured.');
-    }
+            if (!$monthlyROI) {
+                throw new \Exception('Monthly ROI not configured.');
+            }
 
-    $object->roi_tier_id = $roi_tier->id;
+            $object->roi_tier_id = $roi_tier->id;
 
-    // Lock values forever
-    $object->joining_roi_percent = $monthlyROI->daily_roi;
-    $object->apy = $monthlyROI->daily_roi;
-    $object->d_apy = $monthlyROI->daily_roi;
+            // Lock values forever
+            $object->joining_roi_percent = $monthlyROI->daily_roi;
+            $object->apy = $monthlyROI->daily_roi;
+            $object->d_apy = $monthlyROI->daily_roi;
 
-    $object->cap_multiplier = $kit->cap_multiplier;
-$object->maximum_income = $amount * $kit->cap_multiplier;
-    $object->total_roi_paid = 0;
+            $object->cap_multiplier = $kit->cap_multiplier;
+            $object->maximum_income = $amount * $kit->cap_multiplier;
+            $object->total_roi_paid = 0;
 
-    // Keep legacy fields for compatibility
-    $object->return_days = 36500;
-    $object->return_date = date('Y-m-d H:i:s', strtotime($date.' + 36500 days'));
-}
+            // Keep legacy fields for compatibility
+            $object->return_days = 36500;
+            $object->return_date = date('Y-m-d H:i:s', strtotime($date.' + 36500 days'));
+        }
         else
         {
             $object->return_days = $kit->months;

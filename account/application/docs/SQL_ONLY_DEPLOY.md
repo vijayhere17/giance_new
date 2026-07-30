@@ -14,6 +14,19 @@ Use only:
 5. **LAST** — SECTION E (UPDATE + INSERT Rewards Ratio ranks 1–9: BEGINNER…EXCELLENT).
    Or run standalone: `database/sql/2026_07_25_rewards_ratio_ladder.sql`
 
+## ROI package ranges (no gaps)
+
+Run: `database/sql/2026_07_30_roi_tier_continuous_ranges.sql`
+
+Sets continuous tiers:
+- $10–$500
+- $501–$1000
+- $1001–$5000
+- $5001–$10000
+- $10001+ (unlimited)
+
+Also aligns `stake_masters` (ptype=2) package card mins for Buy Robo UI.
+
 ## Already exists (do not recreate)
 
 From prior production schema / earlier work:
